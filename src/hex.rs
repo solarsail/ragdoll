@@ -2,22 +2,52 @@ use std::f64::consts::PI;
 use std::ops::*;
 use geometry::*;
 
+/// 2x2 矩阵，用于坐标变换。
 type Mat2x2 = [[f64;2];2];
 
+/// 六边形格坐标，使用立方体坐标系。
+///
+/// ```
+/// +s    +q
+///   \ | /
+///    \|/
+///     *
+///    /|\
+///   / | \
+///    +r
+/// ```
+///
+/// 对外表示时使用隐含 `s` 轴的二维坐标，表现为
+/// ```
+/// \
+///  \
+/// --*-- +q
+///    \
+///     \
+///     +r
+/// ```
 #[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
 pub struct Hex {
 	coord: [i32; 3]
 }
 
+/// 尖顶六边形的6个“接壤”方向的坐标向量，以边的方向定义，按逆时针方向排列。
 const DIRECTIONS: [Hex; 6] = [
+    /// 右侧
     Hex { coord: [ 1,-1, 0] },  // E
+    /// 右上
     Hex { coord: [ 1, 0,-1] },  // NE
+    /// 左上
     Hex { coord: [ 0, 1,-1] },  // NW
+    /// 左侧
     Hex { coord: [-1, 1, 0] },  // W
+    /// 左下
     Hex { coord: [-1, 0, 1] },  // SW
+    /// 右下
     Hex { coord: [ 0,-1, 1] },  // SE
 ];
 
+/// 尖顶六边形的6个“接壤”方向。
 pub enum Direction {
     E = 0, NE, NW, W, SW, SE
 }
