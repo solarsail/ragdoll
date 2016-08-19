@@ -57,6 +57,10 @@ impl HexMap {
         map
     }
 
+    pub fn radius(&self) -> i32 {
+        self.radius
+    }
+
     pub fn draw(&self, l: &Layout, c: Context, g: &mut G2d) {
         for cell in self.content.iter() {
             cell.draw(l, c, g);

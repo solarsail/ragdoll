@@ -124,86 +124,113 @@ impl Hex {
         }
         edges
     }
+
+    fn round(fq: f64, fr: f64, fs:f64) -> Hex {
+        let mut q = fq.round();
+        let mut r = fr.round();
+        let mut s = fs.round();
+        let dq = (q - fq).abs();
+        let dr = (r - fr).abs();
+        let ds = (s - fs).abs();
+        if dq > dr && dq > ds {
+            q = -r - s;
+        } else if dr > ds {
+            r = -q - s;
+        } else {
+            s = -q - r;
+        }
+        Hex { coord: [q as i32, r as i32, s as i32] }
+    }
+
+    pub fn pixel2hex(p: Point, layout: &Layout) -> Hex {
+        let mat = layout.orientation.mat2coord;
+        let origin = layout.origin;
+        let radius = layout.radius;
+        let pt = [(p[0] - origin[0]) / radius[0], (p[1] - origin[1]) / radius[1]];
+        let q = mat[0][0] * pt[0] + mat[0][1] * pt[1];
+        let r = mat[1][0] * pt[0] + mat[1][1] * pt[1];
+        Hex::round(q, r, -q-r)
+    }
 }
 
 impl Add for Hex {
-	type Output = Hex;
+    type Output = Hex;
 
-	fn add(self, rhs: Hex) -> Hex {
-		Hex::new(self.q() + rhs.q(), self.r() + rhs.r())
-	}
+    fn add(self, rhs: Hex) -> Hex {
+        Hex::new(self.q() + rhs.q(), self.r() + rhs.r())
+    }
 }
 
 impl<'a> Add<Hex> for &'a Hex {
     type Output = Hex;
 
-	fn add(self, rhs: Hex) -> Hex {
-		Hex::new(self.q() + rhs.q(), self.r() + rhs.r())
-	}
+    fn add(self, rhs: Hex) -> Hex {
+        Hex::new(self.q() + rhs.q(), self.r() + rhs.r())
+    }
 }
 
 impl<'a> Add<&'a Hex> for Hex {
     type Output = Hex;
 
-	fn add(self, rhs: &Hex) -> Hex {
-		Hex::new(self.q() + rhs.q(), self.r() + rhs.r())
-	}
+    fn add(self, rhs: &Hex) -> Hex {
+        Hex::new(self.q() + rhs.q(), self.r() + rhs.r())
+    }
 }
 
 impl<'a, 'b> Add<&'a Hex> for &'b Hex {
     type Output = Hex;
 
-	fn add(self, rhs: &'a Hex) -> Hex {
-		Hex::new(self.q() + rhs.q(), self.r() + rhs.r())
-	}
+    fn add(self, rhs: &'a Hex) -> Hex {
+        Hex::new(self.q() + rhs.q(), self.r() + rhs.r())
+    }
 }
 
 impl Sub for Hex {
-	type Output = Hex;
+    type Output = Hex;
 
-	fn sub(self, rhs: Hex) -> Hex {
-		Hex::new(self.q() - rhs.q(), self.r() - rhs.r())
-	}
+    fn sub(self, rhs: Hex) -> Hex {
+        Hex::new(self.q() - rhs.q(), self.r() - rhs.r())
+    }
 }
 
 impl<'a> Sub<Hex> for &'a Hex {
-	type Output = Hex;
+    type Output = Hex;
 
-	fn sub(self, rhs: Hex) -> Hex {
-		Hex::new(self.q() - rhs.q(), self.r() - rhs.r())
-	}
+    fn sub(self, rhs: Hex) -> Hex {
+        Hex::new(self.q() - rhs.q(), self.r() - rhs.r())
+    }
 }
 
 impl<'a> Sub<&'a Hex> for Hex {
-	type Output = Hex;
+    type Output = Hex;
 
-	fn sub(self, rhs: &Hex) -> Hex {
-		Hex::new(self.q() - rhs.q(), self.r() - rhs.r())
-	}
+    fn sub(self, rhs: &Hex) -> Hex {
+        Hex::new(self.q() - rhs.q(), self.r() - rhs.r())
+    }
 }
 
 impl<'a, 'b> Sub<&'a Hex> for &'b Hex {
-	type Output = Hex;
+    type Output = Hex;
 
-	fn sub(self, rhs: &'a Hex) -> Hex {
-		Hex::new(self.q() - rhs.q(), self.r() - rhs.r())
-	}
+    fn sub(self, rhs: &'a Hex) -> Hex {
+        Hex::new(self.q() - rhs.q(), self.r() - rhs.r())
+    }
 }
 
 impl Mul<i32> for Hex {
-	type Output = Hex;
+    type Output = Hex;
 
-	fn mul(self, rhs: i32) -> Hex {
-		Hex::new(self.q() * rhs, self.r() * rhs)
-	}
+    fn mul(self, rhs: i32) -> Hex {
+        Hex::new(self.q() * rhs, self.r() * rhs)
+    }
 }
 
 impl<'a> Mul<i32> for &'a Hex {
-	type Output = Hex;
+    type Output = Hex;
 
-	fn mul(self, rhs: i32) -> Hex {
-		Hex::new(self.q() * rhs, self.r() * rhs)
-	}
+    fn mul(self, rhs: i32) -> Hex {
+        Hex::new(self.q() * rhs, self.r() * rhs)
+    }
 }
 
 pub struct Orientation {
@@ -218,6 +245,7 @@ pub const POINTY_TOP: Orientation = Orientation {
     start_angle: 0.5
 };
 
+#[allow(dead_code)]
 pub const FLAT_TOP: Orientation = Orientation {
     mat2screen: [[1.5, 0.0], [SQRT3/2.0, SQRT3]],
     mat2coord:  [[2.0/3.0, 0.0], [-1.0/3.0, SQRT3/3.0]],
@@ -239,3 +267,4 @@ impl Layout {
         }
     }
 }
+
