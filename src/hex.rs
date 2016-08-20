@@ -91,6 +91,13 @@ impl Hex {
         [x + origin[0], y + origin[1]]
     }
 
+    /// 定点相对于中心的距离向量。
+    /// ```
+    ///   4 *
+    /// 3 *   * 5
+    /// 2 *   * 0
+    ///     * 1
+    /// ```
     fn vertex_offset(layout: &Layout, index: usize) -> Point {
         let radius = layout.radius;
         let angle = PI * (layout.orientation.start_angle + index as f64) / 3.0;
@@ -107,7 +114,15 @@ impl Hex {
         vertices
     }
 
-    pub fn edges(&self, layout: &Layout) -> [PointPair; 6] {
+    pub fn edge_vertices_at(&self, p: usize, layout: &Layout) -> PointPair {
+        debug_assert!(p < 3, "invalid edge index {}", p);
+        let center = self.center_pixel(layout);
+        let v1 = add(center, Hex::vertex_offset(layout, p));
+        let v2 = add(center, Hex::vertex_offset(layout, p+1));
+        PointPair::new(v1, v2)
+    }
+
+    pub fn edges_vertices(&self, layout: &Layout) -> [PointPair; 6] {
         let mut edges = [PointPair::new([0.0, 0.0], [0.0, 0.0]); 6];
         let center = self.center_pixel(layout);
         for i in 0..6 {
@@ -117,6 +132,15 @@ impl Hex {
             edges[(i+5) % 6].set(1, p);
         }
         edges
+    }
+
+    pub fn edges(&self) -> [Edge; 6] {
+        [Edge::new(self.q(), self.r(), 0),
+         Edge::new(self.q(), self.r(), 1),
+         Edge::new(self.q(), self.r(), 2),
+         Edge::new(self.q(), self.r()-1, 0),
+         Edge::new(self.q()+1, self.r()-1, 1),
+         Edge::new(self.q()+1, self.r(), 2)]
     }
 
     fn round(fq: f64, fr: f64, fs:f64) -> Hex {
@@ -262,3 +286,33 @@ impl Layout {
     }
 }
 
+
+#[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
+pub struct Edge {
+    coord: [i32; 3]
+}
+
+impl Edge {
+    pub fn new(q: i32, r: i32, p: i32) -> Edge {
+    	Edge {
+    		coord: [q, r, p]
+    	}
+    }
+
+    pub fn q(&self) -> i32 {
+    	self.coord[0]
+    }
+
+    pub fn r(&self) -> i32 {
+    	self.coord[1]
+    }
+
+    pub fn p(&self) -> usize {
+    	self.coord[2] as usize
+    }
+
+    pub fn vertices(&self, layout: &Layout) -> PointPair {
+        let hex = Hex::new(self.q(), self.r());
+        hex.edge_vertices_at(self.p(), layout)
+    }
+}

@@ -2,16 +2,19 @@ extern crate piston_window;
 
 use std::collections::HashSet;
 use std::cmp::{max, min};
+
 use piston_window::{Context, G2d};
 use piston_window::polygon::*;
 use piston_window::line::*;
-use piston_window::draw_state::DrawState;
+use piston_window::draw_state::*;
+
 use hex::*;
 
+
 const DEFAULT_DRAW_STATE: DrawState = DrawState {
-    scissor: Option::None,
-    stencil: Option::None,
-    blend: Option::None
+    scissor: None,
+    stencil: None,
+    blend: Some(Blend::Alpha)
 };
 
 #[derive(Debug, PartialEq, Eq, Hash)]
@@ -25,12 +28,14 @@ impl MapCell {
     }
 
     pub fn draw(&self, l: &Layout, c: Context, g: &mut G2d) {
-        let border = Line::new([0.2, 0.2, 0.2, 1.0], 1.0);
-        let fill = Polygon::new([0.0, 0.8, 0.0, 0.4]);
+        let border = Line::new([0.2, 0.2, 0.2, 1.0], 0.5);
+        let fill = Polygon::new([0.5, 0.5, 0.5, 0.4]);
         fill.draw(&self.hex.vertices(l), &DEFAULT_DRAW_STATE, c.transform, g);
-        for edge in self.hex.edges(l).iter() {
+        /*
+        for edge in self.hex.edges_vertices(l).iter() {
             border.draw(edge, &DEFAULT_DRAW_STATE, c.transform, g);
         }
+        */
     }
 }
 
