@@ -33,17 +33,11 @@ pub struct Hex {
 
 /// 尖顶六边形的6个“接壤”方向的坐标向量，以边的方向定义，按逆时针方向排列。
 const DIRECTIONS: [Hex; 6] = [
-    /// 右侧
     Hex { coord: [ 1,-1, 0] },  // E
-    /// 右上
     Hex { coord: [ 1, 0,-1] },  // NE
-    /// 左上
     Hex { coord: [ 0, 1,-1] },  // NW
-    /// 左侧
     Hex { coord: [-1, 1, 0] },  // W
-    /// 左下
     Hex { coord: [-1, 0, 1] },  // SW
-    /// 右下
     Hex { coord: [ 0,-1, 1] },  // SE
 ];
 
