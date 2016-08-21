@@ -1,5 +1,4 @@
 extern crate piston_window;
-extern crate sdl2_window;
 
 mod geometry;
 mod map;
@@ -7,7 +6,6 @@ mod region;
 mod hex;
 
 use piston_window::*;
-use sdl2_window::Sdl2Window;
 
 use map::*;
 use hex::*;
@@ -16,10 +14,9 @@ use region::{Region, Category};
 fn main() {
     let layout = Layout::new(POINTY_TOP, [20.0, 20.0], [200.0, 200.0]);
 
-    let mut window: PistonWindow<Sdl2Window> =
+    let mut window: PistonWindow =
         WindowSettings::new("Hello Piston!", [640, 480])
         .samples(4)
-        .opengl(OpenGL::V2_1)
         .exit_on_esc(true)
         .build().unwrap();
 
