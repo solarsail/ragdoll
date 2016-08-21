@@ -4,12 +4,14 @@ mod geometry;
 mod map;
 mod region;
 mod hex;
+mod game;
 
 use piston_window::*;
 
 use map::*;
 use hex::*;
 use region::{Region, Category};
+use game::*;
 
 fn main() {
     let layout = Layout::new(POINTY_TOP, [20.0, 20.0], [200.0, 200.0]);
@@ -22,6 +24,8 @@ fn main() {
 
     let map = HexMap::new(5);
 
+    let mut game = Game::new(map, layout);
+    /*
     let mut region1 = Region::new().category(Category::Player);
     region1.push(Hex::new(0, 0));
     region1.push(Hex::new(0, 1));
@@ -39,35 +43,15 @@ fn main() {
     let mut region4 = Region::new().category(Category::Friendly);
     region4.push(Hex::new(-1, -3));
     region4.push(Hex::new(0, -3));
+    */
 
-    let mut cursor = Region::new().category(Category::Neutral);
     while let Some(e) = window.next() {
         match e {
             Event::Input(input) => {
-                match input {
-                    Input::Move(m) => {
-                        match m {
-                            Motion::MouseCursor(x, y) => {
-                                let hex = Hex::from_pixel([x, y], &layout);
-                                cursor.clear();
-                                cursor.push(hex);
-                            }
-                            _ => {}
-                        }
-                    }
-                    _ => {}
-                }
+                game.on_input(input);
             }
-            Event::Render(rargs) => {
-                window.draw_2d(&e, |c, g| {
-                    clear([1.0; 4], g);
-                    map.draw(&layout, c, g);
-                    region1.draw(&layout, c, g);
-                    region2.draw(&layout, c, g);
-                    region3.draw(&layout, c, g);
-                    region4.draw(&layout, c, g);
-                    cursor.draw(&layout, c, g);
-                });
+            Event::Render(_) => {
+                game.on_render(&e, &mut window);
             }
             _ => {}
         }
