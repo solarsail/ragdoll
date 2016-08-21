@@ -54,6 +54,10 @@ impl Region {
         self.cells.insert(hex);
     }
 
+    pub fn clear(&mut self) {
+        self.cells.clear();
+    }
+
     pub fn draw(&self, l: &Layout, c: Context, g: &mut G2d) {
         let border = Line::new([0.2, 0.2, 0.2, 0.5], 1.0);
         let fill = Polygon::new(type_color(&self.category));

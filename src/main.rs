@@ -40,14 +40,36 @@ fn main() {
     region4.push(Hex::new(-1, -3));
     region4.push(Hex::new(0, -3));
 
+    let mut cursor = Region::new().category(Category::Neutral);
     while let Some(e) = window.next() {
-        window.draw_2d(&e, |c, g| {
-            clear([1.0; 4], g);
-            map.draw(&layout, c, g);
-            region1.draw(&layout, c, g);
-            region2.draw(&layout, c, g);
-            region3.draw(&layout, c, g);
-            region4.draw(&layout, c, g);
-        });
+        match e {
+            Event::Input(input) => {
+                match input {
+                    Input::Move(m) => {
+                        match m {
+                            Motion::MouseCursor(x, y) => {
+                                let hex = Hex::from_pixel([x, y], &layout);
+                                cursor.clear();
+                                cursor.push(hex);
+                            }
+                            _ => {}
+                        }
+                    }
+                    _ => {}
+                }
+            }
+            Event::Render(rargs) => {
+                window.draw_2d(&e, |c, g| {
+                    clear([1.0; 4], g);
+                    map.draw(&layout, c, g);
+                    region1.draw(&layout, c, g);
+                    region2.draw(&layout, c, g);
+                    region3.draw(&layout, c, g);
+                    region4.draw(&layout, c, g);
+                    cursor.draw(&layout, c, g);
+                });
+            }
+            _ => {}
+        }
     }
 }

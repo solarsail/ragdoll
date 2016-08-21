@@ -160,14 +160,14 @@ impl Hex {
         Hex { coord: [q as i32, r as i32, s as i32] }
     }
 
-    pub fn pixel2hex(p: Point, layout: &Layout) -> Hex {
+    pub fn from_pixel(p: Point, layout: &Layout) -> Hex {
         let mat = layout.orientation.mat2coord;
         let origin = layout.origin;
         let radius = layout.radius;
         let pt = [(p[0] - origin[0]) / radius[0], (p[1] - origin[1]) / radius[1]];
         let q = mat[0][0] * pt[0] + mat[0][1] * pt[1];
         let r = mat[1][0] * pt[0] + mat[1][1] * pt[1];
-        Hex::round(q, r, -q-r)
+        Hex::round(q, -q-r, r)
     }
 }
 
