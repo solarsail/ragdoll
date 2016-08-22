@@ -25,7 +25,7 @@ pub enum Category {
 
 fn type_color(category: &Category) -> [f32; 4] {
     match category {
-        &Category::Neutral => [0.8, 0.8, 0.0, 0.5],
+        &Category::Neutral => [0.9, 0.9, 0.0, 0.5],
         &Category::Friendly => [0.0, 1.0, 0.0, 0.5],
         &Category::Hostile => [1.0, 0.0, 0.0, 0.5],
         &Category::Player => [0.0, 0.0, 1.0, 0.5]
@@ -38,16 +38,11 @@ pub struct Region {
 }
 
 impl Region {
-    pub fn new() -> Region {
+    pub fn new(c: Category) -> Region {
         Region {
             category: Category::Neutral,
             cells: HashSet::new()
         }
-    }
-
-    pub fn category(mut self, t: Category) -> Self {
-        self.category = t;
-        self
     }
 
     pub fn push(&mut self, hex: Hex) {

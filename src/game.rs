@@ -15,22 +15,30 @@ enum State {
     Pause,
 }
 
+enum Scroll {
+    None, Left, Right, Up, Down
+}
+
 pub struct Game {
     state: State,
+    windows_size: [u32; 2],
     map: HexMap,
     layout: Layout,
     cursor_region: Region,
-    cursor_coord: [f64; 2]
+    cursor_coord: [f64; 2],
+    scroll: Scroll
 }
 
 impl Game {
-    pub fn new(map: HexMap, layout: Layout) -> Self {
+    pub fn new(size: [u32; 2], map: HexMap, layout: Layout) -> Self {
         Game {
             state: State::Gameplay,
+            windows_size: size,
             map: map,
             layout: layout,
-            cursor_region: Region::new().category(Category::Neutral),
-            cursor_coord: [0.0, 0.0]
+            cursor_region: Region::new(Category::Neutral),
+            cursor_coord: [0.0, 0.0],
+            scroll: Scroll::None
         }
     }
 
@@ -55,6 +63,13 @@ impl Game {
                 match m {
                     Motion::MouseCursor(x, y) => {
                         self.cursor_coord = [x, y];
+                        if x < 20.0 {
+                            self.scroll = Scroll::Left; 
+                        } else if x > self.windows_size[0] as f64 - 20.0 {
+                            self.scroll = Scroll::Right;
+                        } else {
+                            self.scroll = Scroll::None;
+                        }
                     }
                     _ => {}
                 }
