@@ -5,6 +5,7 @@ mod map;
 mod region;
 mod hex;
 mod game;
+mod settings;
 
 use piston_window::*;
 
@@ -12,10 +13,12 @@ use map::*;
 use hex::*;
 use region::{Region, Category};
 use game::*;
+use settings::*;
 
 fn main() {
     let layout = Layout::new(POINTY_TOP, [20.0, 20.0], [200.0, 200.0]);
-    let wsize = [640, 480];
+    let settings = Settings::load("settings.ini");
+    let wsize = [settings.window_width, settings.window_height];
 
     let mut window: PistonWindow =
         WindowSettings::new("Hello Piston!", wsize)
@@ -25,7 +28,7 @@ fn main() {
 
     let map = HexMap::new(5);
 
-    let mut game = Game::new(wsize, map, layout);
+    let mut game = Game::new(settings, map, layout);
     /*
     let mut region2 = Region::new(Category::Friendly);
     region2.push(Hex::new(-2, 0));
@@ -37,6 +40,9 @@ fn main() {
         match e {
             Event::Input(input) => {
                 game.on_input(input);
+            }
+            Event::Update(UpdateArgs { dt }) => {
+                game.on_update(dt);
             }
             Event::Render(_) => {
                 game.on_render(&e, &mut window);
