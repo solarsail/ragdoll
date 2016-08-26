@@ -20,6 +20,8 @@ enum Scroll {
     None, Left, Right, Up, Down
 }
 
+const SCROLL_AREA :f64 = 5.0;
+
 pub struct Game {
     state: State,
     render_size: [u32; 2],
@@ -94,16 +96,16 @@ impl Game {
                 match m {
                     Motion::MouseCursor(x, y) => {
                         self.cursor_coord = [x, y];
-                        if x < 20.0 {
+                        if x < SCROLL_AREA {
                             self.scroll[0] = Scroll::Left;
-                        } else if x > self.render_size[0] as f64 - 20.0 {
+                        } else if x > self.render_size[0] as f64 - SCROLL_AREA {
                             self.scroll[0] = Scroll::Right;
                         } else {
                             self.scroll[0] = Scroll::None;
                         }
-                        if y < 20.0 {
+                        if y < SCROLL_AREA {
                             self.scroll[1] = Scroll::Up;
-                        } else if y > self.render_size[1] as f64 - 20.0 {
+                        } else if y > self.render_size[1] as f64 - SCROLL_AREA {
                             self.scroll[1] = Scroll::Down;
                         } else {
                             self.scroll[1] = Scroll::None;
