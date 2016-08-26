@@ -29,6 +29,7 @@ pub struct Game {
     layout: Layout,
     cursor_region: Region,
     cursor_coord: [f64; 2],
+    cursor_world_coord: [f64; 2],
     origin: [f64; 2],
     scroll: [Scroll; 2],
     scroll_rate: u32
@@ -43,6 +44,7 @@ impl Game {
             layout: layout,
             cursor_region: Region::new(Category::Neutral),
             cursor_coord: [0.0, 0.0],
+            cursor_world_coord: [0.0, 0.0],
             origin: [0.0, 0.0],
             scroll: [Scroll::None, Scroll::None],
             scroll_rate: settings.scroll_rate,
@@ -96,6 +98,7 @@ impl Game {
                 match m {
                     Motion::MouseCursor(x, y) => {
                         self.cursor_coord = [x, y];
+                        self.cursor_world_coord = [x+self.origin[0], y+self.origin[1]];
                         if x < SCROLL_AREA {
                             self.scroll[0] = Scroll::Left;
                         } else if x > self.render_size[0] as f64 - SCROLL_AREA {
@@ -117,7 +120,7 @@ impl Game {
             Input::Press(btn) => {
                 match btn {
                     Button::Mouse(MouseButton::Left) => {
-                        let hex = Hex::from_pixel(self.cursor_coord, &self.layout);
+                        let hex = Hex::from_pixel(self.cursor_world_coord, &self.layout);
                         self.cursor_region.push(hex);
                     }
                     _ => {}
