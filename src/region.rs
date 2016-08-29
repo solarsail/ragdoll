@@ -5,16 +5,10 @@ use std::collections::HashSet;
 use piston_window::{Context, G2d};
 use piston_window::polygon::*;
 use piston_window::line::*;
-use piston_window::draw_state::*;
 
 use hex::*;
+use default;
 
-
-const DEFAULT_DRAW_STATE: DrawState = DrawState {
-    scissor: None,
-    stencil: None,
-    blend: Some(Blend::Alpha)
-};
 
 pub enum Category {
     Neutral,
@@ -63,11 +57,11 @@ impl Region {
             let candidates: HashSet<_> = hex.edges().iter().cloned().collect();
             edges = edges.symmetric_difference(&candidates).cloned().collect();
             // 绘制填充
-            fill.draw(&hex.vertices(l), &DEFAULT_DRAW_STATE, c.transform, g);
+            fill.draw(&hex.vertices(l), default::draw_state(), c.transform, g);
         }
         // 绘制轮廓
         for edge in edges.iter() {
-            border.draw(edge.vertices(l), &DEFAULT_DRAW_STATE, c.transform, g);
+            border.draw(edge.vertices(l), default::draw_state(), c.transform, g);
         }
     }
 }

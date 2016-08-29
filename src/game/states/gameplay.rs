@@ -12,6 +12,7 @@ enum Scroll {
 
 const SCROLL_AREA: f64 = 5.0;
 
+
 pub struct GamePlayState {
     map: HexMap,
     layout: Layout,

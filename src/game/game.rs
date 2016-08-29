@@ -23,20 +23,22 @@ pub struct GameContext {
     pub scroll_rate: u32
 }
 
-pub struct Game {
+pub struct Game<'a> {
     states: Vec<Box<GameState>>,
     context: GameContext,
+    window: &'a mut PistonWindow,
 }
 
-impl Game {
-    pub fn new(settings: Settings) -> Self {
+impl<'a> Game<'a> {
+    pub fn new(settings: Settings, window: &'a mut PistonWindow) -> Self {
         Game {
             states: Vec::with_capacity(3),
             context: GameContext {
                 render_size: [settings.window_width, settings.window_height],
                 cursor_screen_coord: [0.0, 0.0],
                 scroll_rate: settings.scroll_rate,
-            }
+            },
+            window: window
         }
     }
 
@@ -49,10 +51,10 @@ impl Game {
         });
     }
 
-    pub fn run(&mut self, window: &mut PistonWindow) {
+    pub fn run(&mut self) {
         let last = self.states.len() - 1;
 
-        while let Some(e) = window.next() {
+        while let Some(e) = self.window.next() {
             self.make_context(&e);
             match e {
                 Event::Input(input) => {
@@ -65,7 +67,7 @@ impl Game {
                 }
                 Event::Render(_) => {
                     for s in self.states.iter_mut() {
-                        s.on_render(&self.context, &e, window);
+                        s.on_render(&self.context, &e, self.window);
                     }
                 }
                 _ => {}
@@ -75,12 +77,13 @@ impl Game {
     }
 
     pub fn push_state(&mut self, s: State) {
-        let state = match s {
-            _ => {
+        let state: Box<GameState> = match s {
+            State::Gameplay => {
                 let map = HexMap::new(5);
                 let layout = Layout::new(POINTY_TOP, [20.0, 20.0], [200.0, 200.0]);
                 Box::new(GamePlayState::new(map, layout))
             }
+            _ => Box::new(OpeningState::new(2.0, self.window))
         };
         self.states.push(state);
     }

@@ -1,5 +1,6 @@
 extern crate piston_window;
 
+mod default;
 mod geometry;
 mod map;
 mod region;
@@ -22,8 +23,8 @@ fn main() {
         .exit_on_esc(true)
         .build().unwrap();
 
-    let mut game = Game::new(settings);
+    let mut game = Game::new(settings, &mut window);
 
     game.push_state(State::Gameplay);
-    game.run(&mut window);
+    game.run();
 }
