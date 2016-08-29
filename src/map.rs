@@ -5,7 +5,7 @@ use std::cmp::{max, min};
 
 use piston_window::{Context, G2d};
 use piston_window::polygon::*;
-use piston_window::line::*;
+//use piston_window::line::*;
 use piston_window::draw_state::*;
 
 use hex::*;
@@ -28,10 +28,10 @@ impl MapCell {
     }
 
     pub fn draw(&self, l: &Layout, c: Context, g: &mut G2d) {
-        let border = Line::new([0.2, 0.2, 0.2, 1.0], 0.5);
         let fill = Polygon::new([0.5, 0.5, 0.5, 0.4]);
         fill.draw(&self.hex.vertices(l), &DEFAULT_DRAW_STATE, c.transform, g);
         /*
+        let border = Line::new([0.2, 0.2, 0.2, 1.0], 0.5);
         for edge in self.hex.edges_vertices(l).iter() {
             border.draw(edge, &DEFAULT_DRAW_STATE, c.transform, g);
         }
@@ -62,6 +62,7 @@ impl HexMap {
         map
     }
 
+    #[allow(dead_code)]
     pub fn radius(&self) -> i32 {
         self.radius
     }

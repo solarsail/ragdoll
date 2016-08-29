@@ -5,8 +5,8 @@ use piston_window::*;
 use hex::*;
 use map::*;
 use settings::*;
-use gamestate::*;
-use gameplay::*;
+use game::GameState;
+use game::states::*;
 
 
 #[derive(Debug)]

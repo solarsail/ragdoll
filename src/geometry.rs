@@ -35,6 +35,7 @@ impl<'a> Into<[f64; 4]> for &'a PointPair {
 }
 
 /// 向量取反。
+#[allow(dead_code)]
 pub fn neg(vec: Point) -> Point {
     [-vec[0], -vec[1]]
 }

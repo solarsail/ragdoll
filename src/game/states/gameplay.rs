@@ -4,8 +4,7 @@ use piston_window::*;
 use hex::*;
 use map::*;
 use region::{Region, Category};
-use game::GameContext;
-use gamestate::*;
+use game::{GameContext, GameState};
 
 enum Scroll {
     None, Left, Right, Up, Down
@@ -58,6 +57,7 @@ impl GameState for GamePlayState {
         }
     }
 
+    #[allow(unused_variables)]
     fn on_render(&mut self, gc: &GameContext, e: &Event, w: &mut PistonWindow) {
         w.draw_2d(e, |c, g| {
             clear([1.0; 4], g);
