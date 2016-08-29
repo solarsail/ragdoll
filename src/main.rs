@@ -5,18 +5,16 @@ mod map;
 mod region;
 mod hex;
 mod game;
+mod gamestate;
+mod gameplay;
 mod settings;
 
 use piston_window::*;
 
-use map::*;
-use hex::*;
-use region::{Region, Category};
 use game::*;
 use settings::*;
 
 fn main() {
-    let layout = Layout::new(POINTY_TOP, [20.0, 20.0], [200.0, 200.0]);
     let settings = Settings::load("settings.ini");
     let wsize = [settings.window_width, settings.window_height];
 
@@ -26,9 +24,7 @@ fn main() {
         .exit_on_esc(true)
         .build().unwrap();
 
-    let map = HexMap::new(5);
-
-    let mut game = Game::new(settings, map, layout);
+    let mut game = Game::new(settings);
     /*
     let mut region2 = Region::new(Category::Friendly);
     region2.push(Hex::new(-2, 0));
@@ -36,18 +32,6 @@ fn main() {
     region2.push(Hex::new(-2, -2));
     */
 
-    while let Some(e) = window.next() {
-        match e {
-            Event::Input(input) => {
-                game.on_input(input);
-            }
-            Event::Update(UpdateArgs { dt }) => {
-                game.on_update(dt);
-            }
-            Event::Render(_) => {
-                game.on_render(&e, &mut window);
-            }
-            _ => {}
-        }
-    }
+    game.push_state(State::Gameplay);
+    game.run(&mut window);
 }

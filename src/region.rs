@@ -40,7 +40,7 @@ pub struct Region {
 impl Region {
     pub fn new(c: Category) -> Region {
         Region {
-            category: Category::Neutral,
+            category: c,
             cells: HashSet::new()
         }
     }
@@ -57,11 +57,15 @@ impl Region {
         let border = Line::new([0.2, 0.2, 0.2, 0.5], 1.0);
         let fill = Polygon::new(type_color(&self.category));
         let mut edges: HashSet<Edge> = HashSet::new();
+        // 遍历包含的所有网格
         for hex in self.cells.iter() {
+            // 计算轮廓
             let candidates: HashSet<_> = hex.edges().iter().cloned().collect();
             edges = edges.symmetric_difference(&candidates).cloned().collect();
+            // 绘制填充
             fill.draw(&hex.vertices(l), &DEFAULT_DRAW_STATE, c.transform, g);
         }
+        // 绘制轮廓
         for edge in edges.iter() {
             border.draw(edge.vertices(l), &DEFAULT_DRAW_STATE, c.transform, g);
         }
