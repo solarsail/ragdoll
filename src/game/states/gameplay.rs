@@ -100,8 +100,22 @@ impl GameState for GamePlayState {
                         let hex = Hex::from_pixel(self.cursor_world_coord, &self.layout);
                         self.cursor_region.push(hex);
                     }
-                    Button::Keyboard(Key::Escape) => {
-                        self.need_pause.set(true);
+                    Button::Keyboard(key) => {
+                        match key {
+                            Key::Up => {
+                                self.scroll[1] = Scroll::Up;
+                            }
+                            Key::Down => {
+                                self.scroll[1] = Scroll::Down;
+                            }
+                            Key::Left => {
+                                self.scroll[0] = Scroll::Left;
+                            }
+                            Key::Right => {
+                                self.scroll[0] = Scroll::Right;
+                            }
+                            _ => {}
+                        }
                     }
                     _ => {}
                 }
@@ -110,6 +124,20 @@ impl GameState for GamePlayState {
                 match btn {
                     Button::Mouse(MouseButton::Left) => {
                         self.cursor_region.clear();
+                    }
+                    Button::Keyboard(key) => {
+                        match key {
+                            Key::Escape => {
+                                self.need_pause.set(true);
+                            }
+                            Key::Up | Key::Down => {
+                                self.scroll[1] = Scroll::None;
+                            }
+                            Key::Left | Key::Right => {
+                                self.scroll[0] = Scroll::None;
+                            }
+                            _ => {}
+                        }
                     }
                     _ => {}
                 }

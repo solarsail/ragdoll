@@ -47,7 +47,7 @@ impl GameState for PauseState {
     #[allow(unused_variables)]
     fn on_input(&mut self, gc: &mut GameContext, input: Input) {
         match input {
-            Input::Press(Button::Keyboard(Key::Escape)) => {
+            Input::Release(Button::Keyboard(Key::Escape)) => {
                 self.done = true;
             }
             _ => {}

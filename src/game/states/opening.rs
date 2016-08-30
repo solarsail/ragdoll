@@ -33,7 +33,7 @@ impl<'a> OpeningState<'a> {
         }
     }
 
-    fn alpha(&self) -> f32 {
+    fn mask_alpha(&self) -> f32 {
         let p = self.total / 5.0;
         if self.total - self.remaining < p {
             (1.0 - (self.total - self.remaining) / p) as f32
@@ -67,7 +67,7 @@ impl<'a> GameState for OpeningState<'a> {
                 c.transform.trans(x as f64, y as f64), g);
             //image(&self.texture, c.transform.trans(x as f64, y as f64), g);
             rectangle(
-                [0.0, 0.0, 0.0, self.alpha()],
+                [0.0, 0.0, 0.0, self.mask_alpha()],
                 [0.0, 0.0, gc.render_size[0] as f64, gc.render_size[1] as f64],
                 c.transform, g);
         });
