@@ -40,7 +40,7 @@ impl GamePlayState {
 }
 
 impl GameState for GamePlayState {
-    fn on_update(&mut self, gc: &GameContext, dt: f64/* in seconds */) {
+    fn on_update(&mut self, gc: &mut GameContext, dt: f64/* in seconds */) {
         let ds = gc.scroll_rate as f64 * dt;
         match self.scroll[0] {
             Scroll::Left => {
@@ -63,7 +63,7 @@ impl GameState for GamePlayState {
     }
 
     #[allow(unused_variables)]
-    fn on_render(&mut self, gc: &GameContext, e: &Event, w: &mut PistonWindow) {
+    fn on_render(&mut self, gc: &mut GameContext, e: &Event, w: &mut PistonWindow) {
         w.draw_2d(e, |c, g| {
             clear([1.0; 4], g);
             let c = c.trans(-self.origin[0], -self.origin[1]);
@@ -72,7 +72,7 @@ impl GameState for GamePlayState {
         });
     }
 
-    fn on_input(&mut self, gc: &GameContext, input: Input) {
+    fn on_input(&mut self, gc: &mut GameContext, input: Input) {
         match input {
             Input::Move(m) => {
                 match m {
@@ -101,6 +101,9 @@ impl GameState for GamePlayState {
                     Button::Mouse(MouseButton::Left) => {
                         let hex = Hex::from_pixel(self.cursor_world_coord, &self.layout);
                         self.cursor_region.push(hex);
+                    }
+                    Button::Keyboard(Key::Escape) => {
+                        self.need_pause.set(true);
                     }
                     _ => {}
                 }

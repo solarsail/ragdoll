@@ -1,7 +1,5 @@
 extern crate piston_window;
-extern crate find_folder;
 
-use std::path::Path;
 use std::marker::PhantomData;
 use piston_window::*;
 use piston_window::rectangle::square;
@@ -20,8 +18,7 @@ pub struct OpeningState<'a> {
 
 impl<'a> OpeningState<'a> {
     pub fn new(t: f64, window: &mut PistonWindow) -> Self {
-        let assets_path = find_folder::Search::ParentsThenKids(3, 3).for_folder("assets").unwrap();
-        let img_path = assets_path.join("images").join("rust-logo.png");
+        let img_path = default::assets_path().join("images").join("rust-logo.png");
         OpeningState {
             total: t,
             remaining: t,
@@ -50,7 +47,7 @@ impl<'a> OpeningState<'a> {
 
 impl<'a> GameState for OpeningState<'a> {
     #[allow(unused_variables)]
-    fn on_update(&mut self, gc: &GameContext, dt: f64) {
+    fn on_update(&mut self, gc: &mut GameContext, dt: f64) {
         self.remaining -= dt;
         if self.remaining < 0.0 {
             self.done = true;
@@ -58,14 +55,15 @@ impl<'a> GameState for OpeningState<'a> {
     }
 
     #[allow(unused_variables)]
-    fn on_render(&mut self, gc: &GameContext, e: &Event, w: &mut PistonWindow) {
+    fn on_render(&mut self, gc: &mut GameContext, e: &Event, w: &mut PistonWindow) {
         let x = gc.render_size[0] / 2 - 100;
         let y = gc.render_size[1] / 2 - 100;
         w.draw_2d(e, |c, g| {
             clear([0.0; 4], g);
             self.image.draw(
                 &self.texture,
-                default::draw_state(),
+                //default::draw_state(),
+                &c.draw_state,
                 c.transform.trans(x as f64, y as f64), g);
             //image(&self.texture, c.transform.trans(x as f64, y as f64), g);
             rectangle(
@@ -76,7 +74,7 @@ impl<'a> GameState for OpeningState<'a> {
     }
 
     #[allow(unused_variables)]
-    fn on_input(&mut self, gc: &GameContext, input: Input) {
+    fn on_input(&mut self, gc: &mut GameContext, input: Input) {
     }
 
     fn state_changed(&self) -> Option<State> {

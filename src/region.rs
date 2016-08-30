@@ -57,11 +57,11 @@ impl Region {
             let candidates: HashSet<_> = hex.edges().iter().cloned().collect();
             edges = edges.symmetric_difference(&candidates).cloned().collect();
             // 绘制填充
-            fill.draw(&hex.vertices(l), default::draw_state(), c.transform, g);
+            fill.draw(&hex.vertices(l), &c.draw_state, c.transform, g);
         }
         // 绘制轮廓
         for edge in edges.iter() {
-            border.draw(edge.vertices(l), default::draw_state(), c.transform, g);
+            border.draw(edge.vertices(l), &c.draw_state, c.transform, g);
         }
     }
 }

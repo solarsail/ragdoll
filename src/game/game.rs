@@ -7,6 +7,7 @@ use map::*;
 use settings::*;
 use game::GameState;
 use game::states::*;
+use resource::Resources;
 
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
@@ -18,14 +19,15 @@ pub enum State {
     Resume,
 }
 
-pub struct GameContext {
+pub struct GameContext<'a> {
     pub cursor_screen_coord: [f64; 2],
     pub render_size: [u32; 2],
-    pub scroll_rate: u32
+    pub scroll_rate: u32,
+    pub res: &'a mut Resources,
 }
 
 pub struct Game<'a> {
-    context: GameContext,
+    context: GameContext<'a>,
     window: &'a mut PistonWindow,
     states: Vec<Box<GameState>>,
     paused: bool,
@@ -33,12 +35,13 @@ pub struct Game<'a> {
 }
 
 impl<'a> Game<'a> {
-    pub fn new(settings: Settings, window: &'a mut PistonWindow) -> Self {
+    pub fn new(settings: Settings, window: &'a mut PistonWindow, res: &'a mut Resources) -> Self {
         Game {
             context: GameContext {
                 render_size: [settings.window_width, settings.window_height],
                 cursor_screen_coord: [0.0, 0.0],
                 scroll_rate: settings.scroll_rate,
+                res: res,
             },
             window: window,
             states: Vec::with_capacity(3),
@@ -65,12 +68,12 @@ impl<'a> Game<'a> {
             match e {
                 Event::Input(input) => {
                     let upmost = &mut self.states[last];
-                    upmost.on_input(&self.context, input);
+                    upmost.on_input(&mut self.context, input);
                 }
                 Event::Update(UpdateArgs { dt }) => {
                     {
                         let upmost = &mut self.states[last];
-                        upmost.on_update(&self.context, dt);
+                        upmost.on_update(&mut self.context, dt);
                     }
                     let st = (&self.states[last]).state_changed();
                     match st {
@@ -88,7 +91,7 @@ impl<'a> Game<'a> {
                 }
                 Event::Render(_) => {
                     for s in self.states.iter_mut() {
-                        s.on_render(&self.context, &e, self.window);
+                        s.on_render(&mut self.context, &e, self.window);
                     }
                 }
                 _ => {}
@@ -113,8 +116,8 @@ impl<'a> Game<'a> {
     }
 
     pub fn pause(&mut self) {
-        debug_assert!(self.current_state == State::Gameplay);
-        let state = Box::new(OpeningState::new(4.0, self.window));
+        //debug_assert!(self.current_state == State::Gameplay);
+        let state = Box::new(PauseState::new());
         self.states.push(state);
         self.paused = true;
     }
