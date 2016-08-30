@@ -7,7 +7,6 @@ use piston_window::{Context, G2d};
 
 use map::Layout;
 use map::mapcell::MapCell;
-use default;
 
 
 pub struct HexMap {

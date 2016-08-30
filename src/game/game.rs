@@ -103,6 +103,7 @@ impl<'a> Game<'a> {
         debug_assert!(!self.paused);
         let state: Box<GameState> = match s {
             State::Opening => Box::new(OpeningState::new(4.0, self.window)),
+            State::Title => Box::new(TitleState::new()),
             _ => {
                 let map = HexMap::new(5);
                 let layout = Layout::new(POINTY_TOP, [20.0, 20.0], [200.0, 200.0]);

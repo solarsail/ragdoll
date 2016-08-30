@@ -19,10 +19,10 @@ impl PauseState {
 }
 
 impl GameState for PauseState {
+    #[allow(unused_variables)]
     fn on_update(&mut self, gc: &mut GameContext, dt: f64/* in seconds */) {
     }
 
-    #[allow(unused_variables)]
     fn on_render(&mut self, gc: &mut GameContext, e: &Event, w: &mut PistonWindow) {
         let center_x = gc.render_size[0] as f64 / 2.;
         let center_y = gc.render_size[1] as f64 / 2.;
@@ -44,6 +44,7 @@ impl GameState for PauseState {
         });
     }
 
+    #[allow(unused_variables)]
     fn on_input(&mut self, gc: &mut GameContext, input: Input) {
         match input {
             Input::Press(Button::Keyboard(Key::Escape)) => {

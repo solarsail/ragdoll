@@ -7,7 +7,6 @@ use piston_window::polygon::*;
 use piston_window::line::*;
 
 use map::{Hex, Edge, Layout};
-use default;
 
 
 pub enum Category {
