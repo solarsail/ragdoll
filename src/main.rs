@@ -3,6 +3,8 @@ extern crate piston_window;
 mod default;
 mod map;
 mod game;
+mod geometry;
+mod view;
 mod settings;
 mod resource;
 
@@ -16,7 +18,7 @@ fn main() {
     let wsize = [settings.window_width, settings.window_height];
 
     let mut window: PistonWindow =
-        WindowSettings::new("Hello Piston!", wsize)
+        WindowSettings::new("ragdoll", wsize)
         .samples(4)
         .exit_on_esc(false)
         .build().unwrap();

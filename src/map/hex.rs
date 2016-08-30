@@ -1,6 +1,6 @@
 use std::f64::consts::PI;
 use std::ops::*;
-use map::geometry::{Point, PointPair, add, SQRT3};
+use geometry::{Point, PointPair, add, SQRT3};
 
 /// 2x2 矩阵，用于坐标变换。
 type Mat2x2 = [[f64;2];2];
