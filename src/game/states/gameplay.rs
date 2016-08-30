@@ -3,9 +3,7 @@ extern crate piston_window;
 use std::cell::Cell;
 
 use piston_window::*;
-use hex::*;
 use map::*;
-use region::{Region, Category};
 use game::{GameContext, GameState, State};
 
 enum Scroll {

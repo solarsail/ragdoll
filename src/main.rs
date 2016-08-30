@@ -1,10 +1,7 @@
 extern crate piston_window;
 
 mod default;
-mod geometry;
 mod map;
-mod region;
-mod hex;
 mod game;
 mod settings;
 mod resource;

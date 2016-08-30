@@ -2,7 +2,6 @@ extern crate piston_window;
 
 use piston_window::*;
 
-use hex::*;
 use map::*;
 use settings::*;
 use game::GameState;

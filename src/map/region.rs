@@ -6,7 +6,7 @@ use piston_window::{Context, G2d};
 use piston_window::polygon::*;
 use piston_window::line::*;
 
-use hex::*;
+use map::{Hex, Edge, Layout};
 use default;
 
 
