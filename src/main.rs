@@ -25,6 +25,5 @@ fn main() {
 
     let mut game = Game::new(settings, &mut window);
 
-    game.push_state(State::Gameplay);
     game.run();
 }

@@ -3,7 +3,7 @@ extern crate piston_window;
 use piston_window::draw_state::*;
 
 
-const DEFAULT_DRAW_STATE: DrawState = DrawState {
+static DEFAULT_DRAW_STATE: DrawState = DrawState {
     scissor: None,
     stencil: None,
     blend: Some(Blend::Alpha)

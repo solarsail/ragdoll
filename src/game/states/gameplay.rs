@@ -1,10 +1,12 @@
 extern crate piston_window;
 
+use std::cell::Cell;
+
 use piston_window::*;
 use hex::*;
 use map::*;
 use region::{Region, Category};
-use game::{GameContext, GameState};
+use game::{GameContext, GameState, State};
 
 enum Scroll {
     None, Left, Right, Up, Down
@@ -20,6 +22,7 @@ pub struct GamePlayState {
     cursor_world_coord: [f64; 2],
     origin: [f64; 2],
     scroll: [Scroll; 2],
+    need_pause: Cell<bool>,
 }
 
 impl GamePlayState {
@@ -30,7 +33,8 @@ impl GamePlayState {
             cursor_region: Region::new(Category::Neutral),
             cursor_world_coord: [0.0, 0.0],
             origin: [0.0, 0.0],
-            scroll: [Scroll::None, Scroll::None]
+            scroll: [Scroll::None, Scroll::None],
+            need_pause: Cell::new(false),
         }
     }
 }
@@ -110,6 +114,15 @@ impl GameState for GamePlayState {
                 }
             }
             _ => {}
+        }
+    }
+
+    fn state_changed(&self) -> Option<State> {
+        if self.need_pause.get() {
+            self.need_pause.set(false);
+            Some(State::Pause)
+        } else {
+            None
         }
     }
 }
