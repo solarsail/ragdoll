@@ -114,6 +114,16 @@ impl Hex {
         vertices
     }
 
+    pub fn bounding_box(&self, layout: &Layout) -> [f64; 4] {
+        let center = self.center_pixel(layout);
+        let x1 = add(center, Hex::vertex_offset(layout, 3))[0];
+        let x2 = add(center, Hex::vertex_offset(layout, 0))[0];
+        let y1 = add(center, Hex::vertex_offset(layout, 4))[1];
+        let y2 = add(center, Hex::vertex_offset(layout, 1))[1];
+        [x1, y1, x2-x1, y2-y1]
+
+    }
+
     pub fn edge_vertices_at(&self, p: usize, layout: &Layout) -> PointPair {
         debug_assert!(p < 3, "invalid edge index {}", p);
         let center = self.center_pixel(layout);

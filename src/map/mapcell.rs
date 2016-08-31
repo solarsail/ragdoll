@@ -26,4 +26,8 @@ impl MapCell {
         }
         */
     }
+
+    pub fn bounding_box(&self, layout: &Layout) -> [f64; 4] {
+        self.hex.bounding_box(layout)
+    }
 }

@@ -5,7 +5,10 @@ use std::cell::Cell;
 use piston_window::*;
 use map::*;
 use game::{GameContext, GameState, State};
+use view::View;
+use geometry::*;
 
+#[derive(PartialEq, Eq)]
 enum Scroll {
     None, Left, Right, Up, Down
 }
@@ -17,10 +20,11 @@ pub struct GamePlayState {
     map: HexMap,
     layout: Layout,
     cursor_region: Region,
-    cursor_world_coord: [f64; 2],
-    origin: [f64; 2],
     scroll: [Scroll; 2],
+    mouse_scroll_lock: bool,
     need_pause: Cell<bool>,
+    map_view: View,
+    ui_view: View,
 }
 
 impl GamePlayState {
@@ -29,32 +33,34 @@ impl GamePlayState {
             map: map,
             layout: layout,
             cursor_region: Region::new(Category::Neutral),
-            cursor_world_coord: [0.0, 0.0],
-            origin: [0.0, 0.0],
             scroll: [Scroll::None, Scroll::None],
+            mouse_scroll_lock: false,
             need_pause: Cell::new(false),
+            map_view: View::new(),
+            ui_view: View::new(),
         }
     }
 }
 
 impl GameState for GamePlayState {
     fn on_update(&mut self, gc: &mut GameContext, dt: f64/* in seconds */) {
+        self.map_view.set_size(gc.render_size[0] as f64, gc.render_size[1] as f64);
         let ds = gc.scroll_rate as f64 * dt;
         match self.scroll[0] {
             Scroll::Left => {
-                self.origin[0] -= ds;
+                self.map_view.trans_self(-ds, 0.0);
             }
             Scroll::Right => {
-                self.origin[0] += ds;
+                self.map_view.trans_self(ds, 0.0);
             }
             _ => {}
         }
         match self.scroll[1] {
             Scroll::Up=> {
-                self.origin[1] -= ds;
+                self.map_view.trans_self(0.0, -ds);
             }
             Scroll::Down=> {
-                self.origin[1] += ds;
+                self.map_view.trans_self(0.0, ds);
             }
             _ => {}
         }
@@ -64,8 +70,8 @@ impl GameState for GamePlayState {
     fn on_render(&mut self, gc: &mut GameContext, e: &Event, w: &mut PistonWindow) {
         w.draw_2d(e, |c, g| {
             clear([1.0; 4], g);
-            let c = c.trans(-self.origin[0], -self.origin[1]);
-            self.map.draw(&self.layout, c, g);
+            let c = c.append_transform(self.map_view.w2s_trans);
+            self.map.draw(&self.layout, &self.map_view, c, g);
             self.cursor_region.draw(&self.layout, c, g);
         });
     }
@@ -74,8 +80,7 @@ impl GameState for GamePlayState {
         match input {
             Input::Move(m) => {
                 match m {
-                    Motion::MouseCursor(x, y) => {
-                        self.cursor_world_coord = [x+self.origin[0], y+self.origin[1]];
+                    Motion::MouseCursor(x, y) if !self.mouse_scroll_lock => {
                         if x < SCROLL_AREA {
                             self.scroll[0] = Scroll::Left;
                         } else if x > gc.render_size[0] as f64 - SCROLL_AREA {
@@ -97,22 +102,27 @@ impl GameState for GamePlayState {
             Input::Press(btn) => {
                 match btn {
                     Button::Mouse(MouseButton::Left) => {
-                        let hex = Hex::from_pixel(self.cursor_world_coord, &self.layout);
+                        let cursor_world_coord = transform_pos(self.map_view.s2w_trans, gc.cursor_screen_coord);
+                        let hex = Hex::from_pixel(cursor_world_coord, &self.layout);
                         self.cursor_region.push(hex);
                     }
                     Button::Keyboard(key) => {
                         match key {
                             Key::Up => {
                                 self.scroll[1] = Scroll::Up;
+                                self.mouse_scroll_lock = true;
                             }
                             Key::Down => {
                                 self.scroll[1] = Scroll::Down;
+                                self.mouse_scroll_lock = true;
                             }
                             Key::Left => {
                                 self.scroll[0] = Scroll::Left;
+                                self.mouse_scroll_lock = true;
                             }
                             Key::Right => {
                                 self.scroll[0] = Scroll::Right;
+                                self.mouse_scroll_lock = true;
                             }
                             _ => {}
                         }
@@ -132,9 +142,15 @@ impl GameState for GamePlayState {
                             }
                             Key::Up | Key::Down => {
                                 self.scroll[1] = Scroll::None;
+                                if self.scroll[0] == Scroll::None {
+                                    self.mouse_scroll_lock = false;
+                                }
                             }
                             Key::Left | Key::Right => {
                                 self.scroll[0] = Scroll::None;
+                                if self.scroll[1] == Scroll::None {
+                                    self.mouse_scroll_lock = false;
+                                }
                             }
                             _ => {}
                         }

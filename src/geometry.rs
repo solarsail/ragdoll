@@ -2,9 +2,7 @@ extern crate piston_window;
 
 use std::convert::Into;
 
-/// 向量加法。
-pub use piston_window::math::add;
-pub use piston_window::math::Matrix2d;
+pub use piston_window::math::*;
 pub type Point = [f64; 2];
 
 /// 点对，可以用于表示线段的端点。
@@ -44,13 +42,12 @@ pub fn neg(vec: Point) -> Point {
 /// 3 的平方根。
 pub const SQRT3: f64 = 1.7320508;
 
-pub trait HasArea {
-    fn bounding_box(&self) -> [f64; 4];
-}
-
 pub fn rect_intersect(a: [f64; 4], b: [f64; 4]) -> bool {
+    overlap_rectangle(a, b).is_some()
+    /*
     a[0] < b[0] + b[2] &&
     a[0] + a[2] > b[0] &&
     a[1] < b[1] + b[3] &&
     a[1] + a[3] > b[1] 
+    */
 }

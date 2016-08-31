@@ -3,34 +3,51 @@ use geometry::*;
 #[derive(Debug)]
 pub struct View {
 	pub rect: [f64; 4],
-	pub transform: Matrix2d,
+	pub w2s_trans: Matrix2d,
+	pub s2w_trans: Matrix2d,
 }
 
 impl View {
 	pub fn new() -> Self {
 		View {
 			rect: [0.0; 4],
-			transform: [
+			w2s_trans: [
+				[1.0, 0.0, 0.0],
+				[0.0, 1.0, 0.0]
+			],
+			s2w_trans: [
 				[1.0, 0.0, 0.0],
 				[0.0, 1.0, 0.0]
 			],
 		}
 	}
 
+	pub fn set_size(&mut self, w: f64, h: f64) {
+		self.rect[2] = w;
+		self.rect[3] = h;
+	}
+
 	pub fn trans(&self, x: f64, y: f64) -> Self {
-		let mut t = self.transform.clone();
-		t[0][2] = self.transform[0][2]-x;
-		t[1][2] = self.transform[1][2]-y;
 		View {
 			rect: [
 				self.rect[0]+x, self.rect[1]+y,
 			    self.rect[2], self.rect[3]
 			],
-			transform: t, // world -> screen
+			w2s_trans: translate([-self.rect[0]-x, -self.rect[1]-y]), // world -> screen
+			s2w_trans: translate([self.rect[0]+x, self.rect[1]+y])
 		}
 	}
 
-	pub fn filter<T: HasArea>(&self, obj: &T) -> bool {
-		rect_intersect(self.rect, obj.bounding_box())
+	pub fn trans_self(&mut self, x: f64, y: f64) {
+		self.w2s_trans[0][2] -= x;
+		self.w2s_trans[1][2] -= y;
+		self.s2w_trans[0][2] += x;
+		self.s2w_trans[1][2] += y;
+		self.rect[0] += x;
+		self.rect[1] += y;
+	}
+
+	pub fn filter(&self, rect: [f64; 4]) -> bool {
+		rect_intersect(self.rect, rect)
 	}
 }

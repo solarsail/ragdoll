@@ -7,6 +7,7 @@ use piston_window::{Context, G2d};
 
 use map::Layout;
 use map::mapcell::MapCell;
+use view::View;
 
 
 pub struct HexMap {
@@ -35,8 +36,8 @@ impl HexMap {
         self.radius
     }
 
-    pub fn draw(&self, l: &Layout, c: Context, g: &mut G2d) {
-        for cell in self.content.iter() {
+    pub fn draw(&self, l: &Layout, v: &View, c: Context, g: &mut G2d) {
+        for cell in self.content.iter().filter(|c| v.filter(c.bounding_box(l))) {
             cell.draw(l, c, g);
         }
     }
