@@ -71,6 +71,7 @@ impl GameState for GamePlayState {
         w.draw_2d(e, |c, g| {
             clear([1.0; 4], g);
             let c = c.append_transform(self.map_view.w2s_trans);
+            // TODO: culling: use view or draw_state.scissor? how to use it?
             self.map.draw(&self.layout, &self.map_view, c, g);
             self.cursor_region.draw(&self.layout, c, g);
         });
@@ -108,21 +109,23 @@ impl GameState for GamePlayState {
                     }
                     Button::Keyboard(key) => {
                         match key {
+                            Key::Up | Key::Down | Key::Left | Key::Right => {
+                                self.mouse_scroll_lock = true;
+                            }
+                            _ => {}
+                        }
+                        match key {
                             Key::Up => {
                                 self.scroll[1] = Scroll::Up;
-                                self.mouse_scroll_lock = true;
                             }
                             Key::Down => {
                                 self.scroll[1] = Scroll::Down;
-                                self.mouse_scroll_lock = true;
                             }
                             Key::Left => {
                                 self.scroll[0] = Scroll::Left;
-                                self.mouse_scroll_lock = true;
                             }
                             Key::Right => {
                                 self.scroll[0] = Scroll::Right;
-                                self.mouse_scroll_lock = true;
                             }
                             _ => {}
                         }
