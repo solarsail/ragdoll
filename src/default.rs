@@ -19,3 +19,7 @@ pub fn draw_state<'a>() -> &'a DrawState {
 pub fn assets_path() -> PathBuf {
     find_folder::Search::ParentsThenKids(3, 3).for_folder("assets").unwrap()
 }
+
+pub fn fonts_path() -> PathBuf {
+    assets_path().join("fonts")
+}

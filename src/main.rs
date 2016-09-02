@@ -1,3 +1,5 @@
+#[macro_use]
+extern crate conrod;
 extern crate piston_window;
 
 mod default;
@@ -22,6 +24,7 @@ fn main() {
         .samples(4)
         .exit_on_esc(false)
         .build().unwrap();
+    window.set_ups(60);
 
     let mut res = resource::Resources::new(&window);
 
