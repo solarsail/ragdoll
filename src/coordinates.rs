@@ -1,9 +1,6 @@
-use amethyst::renderer::VertexPosNormal
 use amethyst::ecs::{VecStorage, Component};
 
-use std::f64::consts::PI;
 use std::ops::*;
-use geometry::{Point, PointPair, add, SQRT3};
 
 /// 2x2 矩阵，用于坐标变换。
 type Mat2x2 = [[f64;2];2];
@@ -80,46 +77,6 @@ impl Coordinates {
     }
 }
 
-struct Tile {
-    coord: Coordinates,
-    terrain: Terrain
-}
-
-
-pub fn gen_mesh(coord: Coordinates, radius: f32) {
-    let mut data = vec![
-        VertexPosNormal {
-            pos: [-width/2., height/2., 0.],
-            normal: [0., 0., 1.],
-            tex_coord: [0., 1.],
-        },
-        VertexPosNormal {
-            pos: [-width/2., -height/2., 0.],
-            normal: [0., 0., 1.],
-            tex_coord: [0., 0.],
-        },
-        VertexPosNormal {
-            pos: [width/2., -height/2., 0.],
-            normal: [0., 0., 1.],
-            tex_coord: [1., 0.],
-        },
-        VertexPosNormal {
-            pos: [width/2., -height/2., 0.],
-            normal: [0., 0., 1.],
-            tex_coord: [0., 1.],
-        },
-        VertexPosNormal {
-            pos: [width/2., height/2., 0.],
-            normal: [0., 0., 1.],
-            tex_coord: [0., 0.],
-        },
-        VertexPosNormal {
-            pos: [-width/2., height/2., 0.],
-            normal: [0., 0., 1.],
-            tex_coord: [1., 0.],
-        },
-    ]
-}
 
 impl Add for Coordinates {
     type Output = Coordinates;
@@ -201,6 +158,7 @@ impl<'a> Mul<i32> for &'a Coordinates {
     }
 }
 
+/*
 pub struct Orientation {
     mat2screen: Mat2x2,
     mat2coord: Mat2x2,
@@ -266,5 +224,5 @@ impl Edge {
         hex.edge_vertices_at(self.p(), layout)
     }
 }
-
+*/
 

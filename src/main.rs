@@ -7,7 +7,12 @@ use amethyst::config::Element;
 use amethyst::ecs::{World, Join, VecStorage, Component, Processor, RunArg};
 use std::sync::{Mutex, Arc};
 
-//mod tile;
+mod geometry;
+mod coordinates;
+mod mesh;
+mod map;
+mod tile;
+//mod mapprocessor;
 
 struct Pong;
 
@@ -298,6 +303,24 @@ impl State for Pong {
         world.add_resource::<Score>(score);
         world.add_resource::<Projection>(projection.clone());
 
+        let mut ts = tile::TileSettings::new(0.15);
+        ts.set_terrain_mesh(tile::Terrain::Water, "hex".to_string());
+        ts.set_terrain_mesh(tile::Terrain::Basin, "hex".to_string());
+        ts.set_terrain_mesh(tile::Terrain::Plain, "hex".to_string());
+        ts.set_terrain_mesh(tile::Terrain::Hill, "hex".to_string());
+        ts.set_terrain_mesh(tile::Terrain::Plateau, "hex".to_string());
+        ts.set_surface_texture(tile::Surface::Soil, "white".to_string());
+        ts.set_surface_texture(tile::Surface::Grass, "green".to_string());
+        ts.set_surface_texture(tile::Surface::Forest, "green".to_string());
+        ts.set_surface_texture(tile::Surface::Sand, "red".to_string());
+        ts.set_surface_texture(tile::Surface::Snow, "white".to_string());
+        ts.set_surface_texture(tile::Surface::Ice, "white".to_string());
+
+        //world.add_resource::<tile::TileSettings>(ts);
+
+        let map = map::Map::new();
+        //world.add_resource::<map::Map>(map);
+
         // Create a camera entity
         let mut camera = Camera::new(projection, eye, target, up);
         camera.activate();
@@ -308,17 +331,21 @@ impl State for Pong {
         // Generate a square mesh
         context.asset_manager.create_constant_texture("white", [1.0, 1.0, 1.0, 1.]);
         context.asset_manager.create_constant_texture("red", [1.0, 0.0, 0.0, 1.]);
+        context.asset_manager.create_constant_texture("green", [0.0, 1.0, 0.0, 1.]);
+        context.asset_manager.create_constant_texture("blue", [0.0, 0.0, 1.0, 1.]);
         context.asset_manager.gen_rectangle("square", 1.0, 1.0);
         context.asset_manager.gen_rectangle("red_square", 1.0, 1.0);
+        context.asset_manager.load_mesh("hex", &mesh::simple_hex_mesh());
         let square = Renderable::new("square", "white", "red");
-        let red_square = Renderable::new("red_square", "red", "red");
+        //let red_square = Renderable::new("red_square", "red", "red");
+        let red_hex = Renderable::new("hex", "red", "red");
 
         // Create a ball entity
         let mut ball = Ball::new();
         ball.size = 0.02;
         ball.velocity = [0.5, 0.5];
         world.create_now()
-            .with(red_square)
+            .with(red_hex)
             .with(ball)
             .build();
 
@@ -341,6 +368,32 @@ impl State for Pong {
             .with(square.clone())
             .with(plank)
             .build();
+
+        /*
+        let mut tile = Renderable::new("hex", "white", "white");
+        tile.scale[0] = ts.radius();
+        tile.scale[1] = ts.radius();
+        //tile.scale[2] = ts.radius();
+        tile.translation[0] = ts.radius();
+        tile.translation[1] = ts.radius();
+        world.create_now()
+            .with(tile)
+            .build();
+        */
+        for (coord, terrain, surface) in map.iter() {
+            let (surface, terrain) = (ts.get_surface_texture(surface), ts.get_terrain_mesh(terrain));
+            println!("{:?}, {:?}, {:?}", coord, terrain, surface);
+            let mut tile = Renderable::new(terrain, surface, surface);
+            tile.scale[0] = ts.radius();
+            tile.scale[1] = ts.radius();
+            tile.scale[2] = ts.radius();
+            tile.translation[0] = (coord.q() as f32 + coord.r() as f32 * 0.5) * geometry::SQRT3 * ts.radius();
+            tile.translation[1] = coord.r() as f32 * 1.5 * ts.radius();
+            world.create_now()
+                .with(tile)
+                .with(coord)
+                .build();
+        }
     }
 
     fn update(&mut self, context: &mut Context, _: &mut World) -> Trans {
@@ -374,6 +427,8 @@ fn main() {
                    .with::<PongProcessor>(PongProcessor, "pong_processor", 0)
                    .register::<Ball>()
                    .register::<Plank>()
+                   .register::<coordinates::Coordinates>()
+                   //.with::<mapprocessor::MapProcessor>(mapprocessor::MapProcessor::new(), "map_processor", 0)
                    .done();
     game.run();
 }
