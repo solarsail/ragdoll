@@ -14,58 +14,11 @@ mod map;
 mod tile;
 //mod mapprocessor;
 
-struct Pong;
+struct Game;
 
-struct Ball {
-    pub position: [f32; 2],
-    pub velocity: [f32; 2],
-    pub size: f32,
-}
+struct GameProcessor;
 
-impl Ball {
-    pub fn new() -> Ball {
-        Ball {
-            position: [0.0, 0.0],
-            velocity: [-1.0, -1.0],
-            size: 1.0,
-        }
-    }
-}
-
-impl Component for Ball {
-    type Storage = VecStorage<Ball>;
-}
-
-enum Side {
-    Left,
-    Right,
-}
-
-struct Plank {
-    pub position: f32,
-    pub velocity: f32,
-    pub dimensions: [f32; 2],
-    pub side: Side,
-}
-
-impl Plank {
-    pub fn new(side: Side) -> Plank {
-        Plank {
-            position: 0.,
-            velocity: 1.,
-            dimensions: [1., 1.],
-            side: side,
-        }
-    }
-}
-
-impl Component for Plank {
-    type Storage = VecStorage<Plank>;
-}
-
-struct PongProcessor;
-
-unsafe impl Sync for PongProcessor {  }
+unsafe impl Sync for GameProcessor {  }
 
 // If right_up == true then the right plank will move up,
 // other fields work the same way
@@ -74,37 +27,28 @@ struct InputState {
     pub right_down: bool,
     pub left_up: bool,
     pub left_down: bool,
+    pub lmb: bool,
+    pub rmb: bool,
 }
 
 impl InputState {
     pub fn new() -> InputState {
         InputState {
-            right_up: false,
-            right_down: false,
-            left_up: false,
-            left_down: false,
+            up: false,
+            down: false,
+            left: false,
+            right: false,
+            lmb: false,
+            rmb: false,
         }
     }
 }
 
-struct Score {
-    score_left: i32,
-    score_right: i32,
-}
-
-impl Score {
-    pub fn new() -> Score {
-        Score {
-            score_left: 0,
-            score_right: 0,
-        }
-    }
-}
 
 // Pong game processor
-impl Processor<Arc<Mutex<Context>>> for PongProcessor {
+impl Processor<Arc<Mutex<Context>>> for GameProcessor {
     fn run(&mut self, arg: RunArg, context: Arc<Mutex<Context>>) {
-        use amethyst::context::event::{EngineEvent, Event, VirtualKeyCode, ElementState};
+        use amethyst::context::event::{EngineEvent, Event, VirtualKeyCode, MouseButton, ElementState};
         use std::ops::Deref;
 
         // Get all needed component storages and resources
@@ -121,45 +65,29 @@ impl Processor<Arc<Mutex<Context>>> for PongProcessor {
                                          w.read_resource::<Projection>(),
                                          w.write_resource::<Score>()));
 
-        // Get left and right boundaries of the screen
-        let (left_boundary, right_boundary, top_boundary, bottom_boundary) = match *projection.deref() {
-            Projection::Orthographic {
-                left,
-                right,
-                top,
-                bottom,
-                ..
-            } => (left, right, top, bottom),
-            _ => (1.0, 1.0, 1.0, 1.0),
-        };
-
         // Update input_state resource using incoming events
         let engine_events = context.broadcaster.read::<EngineEvent>();
         for engine_event in engine_events.iter() {
             match engine_event.payload {
-                Event::KeyboardInput(ElementState::Pressed, _, Some(VirtualKeyCode::Up)) => input_state.right_up = true,
-                Event::KeyboardInput(ElementState::Pressed, _, Some(VirtualKeyCode::Down)) => input_state.right_down = true,
-                Event::KeyboardInput(ElementState::Released, _, Some(VirtualKeyCode::Up)) => input_state.right_up = false,
-                Event::KeyboardInput(ElementState::Released, _, Some(VirtualKeyCode::Down)) => input_state.right_down = false,
+                Event::KeyboardInput(ElementState::Pressed, _, Some(VirtualKeyCode::Up)) => input_state.up = true,
+                Event::KeyboardInput(ElementState::Pressed, _, Some(VirtualKeyCode::Down)) => input_state.down = true,
+                Event::KeyboardInput(ElementState::Released, _, Some(VirtualKeyCode::Up)) => input_state.up = false,
+                Event::KeyboardInput(ElementState::Released, _, Some(VirtualKeyCode::Down)) => input_state.down = false,
 
-                Event::KeyboardInput(ElementState::Pressed, _, Some(VirtualKeyCode::W)) => input_state.left_up = true,
-                Event::KeyboardInput(ElementState::Pressed, _, Some(VirtualKeyCode::S)) => input_state.left_down = true,
-                Event::KeyboardInput(ElementState::Released, _, Some(VirtualKeyCode::W)) => input_state.left_up = false,
-                Event::KeyboardInput(ElementState::Released, _, Some(VirtualKeyCode::S)) => input_state.left_down = false,
+                Event::KeyboardInput(ElementState::Pressed, _, Some(VirtualKeyCode::Left)) => input_state.left = true,
+                Event::KeyboardInput(ElementState::Pressed, _, Some(VirtualKeyCode::Right)) => input_state.right = true,
+                Event::KeyboardInput(ElementState::Released, _, Some(VirtualKeyCode::Left)) => input_state.left = false,
+                Event::KeyboardInput(ElementState::Released, _, Some(VirtualKeyCode::Right)) => input_state.right = false,
 
+                Event::MouseInput(ElementState::Pressed, MouseButton::Left) => input_state.lmb = true;
+                Event::MouseInput(ElementState::Pressed, MouseButton::Right) => input_state.rmb = true;
+                Event::MouseInput(ElementState::Released, MouseButton::Left) => input_state.lmb = false;
+                Event::MouseInput(ElementState::Released, MouseButton::Right) => input_state.rmb = false;
+                
                 _ => (),
             }
         }
 
-        // Position of left plank
-        let mut left_position = 0.;
-        // Position of right plank
-        let mut right_position = 0.;
-
-        // Dimensions of left plank
-        let mut left_dimensions = [0., 0.];
-        // Dimensions of right plank
-        let mut right_dimensions = [0., 0.];
 
         let delta_time = context.delta_time.subsec_nanos() as f32 / 1.0e9;
         // Process all planks
