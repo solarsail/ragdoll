@@ -13,6 +13,8 @@ pub struct MapProcessor {
     init: bool,
 }
 
+unsafe impl Sync for MapProcessor {  }
+
 impl MapProcessor {
     pub fn new() -> Self {
         MapProcessor {
@@ -30,16 +32,15 @@ impl Processor<Arc<Mutex<Context>>> for MapProcessor {
             w.read_resource::<TileSettings>(),
             w.write::<Renderable>()));
 
-        let map_entity = arg.create();
         for (coord, terrain, surface) in map.iter() {
-            let mut tile = Renderable::new(ts.get_terrain_mesh(terrain),
-                                       ts.get_surface_texture(surface),
-                                       ts.get_surface_texture(surface));
+            let (surface, terrain) = (ts.get_surface_texture(surface), ts.get_terrain_mesh(terrain));
+            let mut tile = Renderable::new(terrain, surface, surface);
             for i in 0..2 {
                 tile.scale[i] = ts.radius();
             }
             tile.translation[0] = (coord.q() as f32 + coord.r() as f32 * 0.5) * SQRT3 * ts.radius();
             tile.translation[1] = coord.r() as f32 * 1.5 * ts.radius();
+            let map_entity = arg.create();
             renderables.insert(map_entity, tile);
         }
         self.init = true;

@@ -1,5 +1,5 @@
-use coordinates::Coordinates;
-use tile::{Terrain, Surface};
+use super::coordinates::Coordinates;
+use super::tile::{Terrain, Surface};
 
 pub struct Map {
     tiles: Vec<Coordinates>,
@@ -13,22 +13,28 @@ impl Map {
 
     }
     */
-    pub fn new() -> Self {
+    pub fn sample() -> Self {
         Map {
             tiles: vec![
                 Coordinates::new(0, 0),
                 Coordinates::new(1, 0),
                 Coordinates::new(0, 1),
+                Coordinates::new(2, 1),
+                Coordinates::new(2, 2),
             ],
             terrains: vec![
                 Terrain::Plain,
+                Terrain::Plain,
                 Terrain::Hill,
-                Terrain::Basin
+                Terrain::Hill,
+                Terrain::Basin,
             ],
             surfaces: vec![
                 Surface::Grass,
                 Surface::Sand,
-                Surface::Snow
+                Surface::Snow,
+                Surface::Snow,
+                Surface::Ice,
             ],
         }
     }
