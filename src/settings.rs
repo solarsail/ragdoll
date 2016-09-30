@@ -6,7 +6,7 @@ pub struct Settings {
 impl Settings {
     pub fn new() -> Settings {
         Settings {
-            scroll_rate: 0.01,
+            scroll_rate: 0.02,
         }
     }
 }

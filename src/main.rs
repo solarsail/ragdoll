@@ -12,7 +12,7 @@ mod map;
 mod settings;
 mod processors;
 
-use processors::InputProcessor;
+use processors::{InputProcessor, CameraProcessor};
 use map::Coordinates;
 
 
@@ -28,8 +28,9 @@ fn main() {
                    .with::<RenderingProcessor>(rendering_processor, "rendering_processor", 0)
                    .register::<Renderable>()
                    .register::<Light>()
+                   .with::<CameraProcessor>(CameraProcessor, "camera_processor", 1)
                    .register::<Camera>()
-                   .with::<InputProcessor>(InputProcessor, "game_processor", 1)
+                   .with::<InputProcessor>(InputProcessor, "game_processor", 2)
                    .register::<Coordinates>()
                    .done();
     game.run();

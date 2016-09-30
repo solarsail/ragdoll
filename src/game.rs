@@ -3,7 +3,7 @@ use amethyst::context::Context;
 use amethyst::processors::rendering::{Renderable, Camera, Projection};
 use amethyst::ecs::{World, Join};
 
-use processors::InputState;
+use processors::{InputState, InputEvents};
 use map::{Map, TileSettings, Surface, Terrain};
 use settings::Settings;
 use mesh;
@@ -41,6 +41,7 @@ impl State for Game {
         // Add all resources
         let input_state = InputState::new();
         world.add_resource::<InputState>(input_state);
+        world.add_resource::<InputEvents>(InputEvents::new());
         world.add_resource::<Projection>(projection.clone());
         world.add_resource::<Settings>(Settings::new());
 
