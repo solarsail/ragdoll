@@ -9,15 +9,6 @@ use game::states::*;
 use resource::Resources;
 
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq)]
-pub enum State {
-    Opening,
-    Title,
-    Gameplay,
-    Pause,
-    Resume,
-}
-
 pub struct GameContext<'a> {
     pub cursor_screen_coord: [f64; 2],
     pub render_size: [u32; 2],
@@ -28,9 +19,8 @@ pub struct GameContext<'a> {
 pub struct Game<'a> {
     context: GameContext<'a>,
     window: &'a mut PistonWindow,
-    states: Vec<Box<GameState>>,
     paused: bool,
-    current_state: State,
+    dfa: &'a StateMachine,
 }
 
 impl<'a> Game<'a> {
