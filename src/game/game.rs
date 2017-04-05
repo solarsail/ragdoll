@@ -49,7 +49,7 @@ impl<'a> Game<'a> {
         }
     }
 
-    fn make_context(&mut self, e: &Event) {
+    fn make_context(&mut self, e: &Input) {
         e.mouse_cursor(|x, y| {
             self.context.cursor_screen_coord = [x, y];
         });
@@ -65,11 +65,11 @@ impl<'a> Game<'a> {
             let last = self.states.len() - 1;
             self.make_context(&e);
             match e {
-                Event::Input(input) => {
+                Input::Press(_) | Input::Release(_) | Input::Move(_) => {
                     let upmost = &mut self.states[last];
-                    upmost.on_input(&mut self.context, input);
+                    upmost.on_input(&mut self.context, &e);
                 }
-                Event::Update(UpdateArgs { dt }) => {
+                Input::Update(UpdateArgs { dt }) => {
                     {
                         let upmost = &mut self.states[last];
                         upmost.on_update(&mut self.context, dt);
@@ -88,7 +88,7 @@ impl<'a> Game<'a> {
                         None => {}
                     }
                 }
-                Event::Render(_) => {
+                Input::Render(_) => {
                     for s in self.states.iter_mut() {
                         s.on_render(&mut self.context, &e, self.window);
                     }

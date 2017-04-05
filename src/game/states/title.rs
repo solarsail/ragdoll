@@ -34,7 +34,7 @@ impl GameState for TitleState {
         }
     }
 
-    fn on_render(&mut self, gc: &mut GameContext, e: &Event, w: &mut PistonWindow) {
+    fn on_render(&mut self, gc: &mut GameContext, e: &Input, w: &mut PistonWindow) {
         let center_x = gc.render_size[0] as f64 / 2.;
         let center_y = gc.render_size[1] as f64 / 2.;
         let title_text = Text::new_color([1.0; 4], 30);
@@ -54,8 +54,8 @@ impl GameState for TitleState {
     }
 
     #[allow(unused_variables)]
-    fn on_input(&mut self, gc: &mut GameContext, input: Input) {
-        match input {
+    fn on_input(&mut self, gc: &mut GameContext, input: &Input) {
+        match *input {
             Input::Press(Button::Keyboard(_)) => {
                 self.next_state = Some(State::Gameplay);
             }

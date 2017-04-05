@@ -67,7 +67,7 @@ impl GameState for GamePlayState {
     }
 
     #[allow(unused_variables)]
-    fn on_render(&mut self, gc: &mut GameContext, e: &Event, w: &mut PistonWindow) {
+    fn on_render(&mut self, gc: &mut GameContext, e: &Input, w: &mut PistonWindow) {
         w.draw_2d(e, |c, g| {
             clear([1.0; 4], g);
             let c = c.append_transform(self.map_view.w2s_trans);
@@ -77,8 +77,8 @@ impl GameState for GamePlayState {
         });
     }
 
-    fn on_input(&mut self, gc: &mut GameContext, input: Input) {
-        match input {
+    fn on_input(&mut self, gc: &mut GameContext, input: &Input) {
+        match *input {
             Input::Move(m) => {
                 match m {
                     Motion::MouseCursor(x, y) if !self.mouse_scroll_lock => {

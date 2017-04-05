@@ -7,16 +7,16 @@ use game::*;
 use default;
 
 
-pub struct OpeningState<'a> {
+pub struct OpeningState {
     total: f64,
     remaining: f64,
     image: Image,
-    texture: G2dTexture<'a>,
-    phantom: PhantomData<&'a i32>,
+    texture: G2dTexture,
+    //phantom: PhantomData<&'a i32>,
     done: bool,
 }
 
-impl<'a> OpeningState<'a> {
+impl OpeningState {
     pub fn new(t: f64, window: &mut PistonWindow) -> Self {
         let img_path = default::assets_path().join("images").join("rust-logo.png");
         OpeningState {
@@ -28,7 +28,7 @@ impl<'a> OpeningState<'a> {
                 &img_path,
                 Flip::None,
                 &TextureSettings::new()).unwrap(),
-            phantom: PhantomData,
+            //phantom: PhantomData,
             done: false,
         }
     }
@@ -45,7 +45,7 @@ impl<'a> OpeningState<'a> {
     }
 }
 
-impl<'a> GameState for OpeningState<'a> {
+impl GameState for OpeningState {
     #[allow(unused_variables)]
     fn on_update(&mut self, gc: &mut GameContext, dt: f64) {
         self.remaining -= dt;
@@ -55,7 +55,7 @@ impl<'a> GameState for OpeningState<'a> {
     }
 
     #[allow(unused_variables)]
-    fn on_render(&mut self, gc: &mut GameContext, e: &Event, w: &mut PistonWindow) {
+    fn on_render(&mut self, gc: &mut GameContext, e: &Input, w: &mut PistonWindow) {
         let x = gc.render_size[0] / 2 - 100;
         let y = gc.render_size[1] / 2 - 100;
         w.draw_2d(e, |c, g| {
@@ -72,7 +72,18 @@ impl<'a> GameState for OpeningState<'a> {
     }
 
     #[allow(unused_variables)]
-    fn on_input(&mut self, gc: &mut GameContext, input: Input) {
+    fn on_input(&mut self, gc: &mut GameContext, input: &Input) {
+        match *input {
+            Input::Press(Button::Keyboard(key)) => {
+                match key {
+                    Key::Escape => {
+                        self.done = true;
+                    }
+                    _ => {}
+                }
+            }
+            _ => {}
+        }
     }
 
     fn state_changed(&self) -> Option<State> {
