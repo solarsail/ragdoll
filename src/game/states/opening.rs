@@ -3,7 +3,7 @@ extern crate piston_window;
 use std::marker::PhantomData;
 use piston_window::*;
 use piston_window::rectangle::square;
-use game::*;
+use game::{GameContext, GameState, StateTrans, StateMachine};
 use default;
 
 
@@ -13,7 +13,6 @@ pub struct OpeningState {
     image: Image,
     texture: G2dTexture,
     //phantom: PhantomData<&'a i32>,
-    done: bool,
 }
 
 impl OpeningState {
@@ -29,7 +28,6 @@ impl OpeningState {
                 Flip::None,
                 &TextureSettings::new()).unwrap(),
             //phantom: PhantomData,
-            done: false,
         }
     }
 
@@ -46,11 +44,15 @@ impl OpeningState {
 }
 
 impl GameState for OpeningState {
+    fn preserve_on_trans(&self) -> bool {
+        false
+    }
+    
     #[allow(unused_variables)]
-    fn on_update(&mut self, gc: &mut GameContext, dt: f64) {
+    fn on_update(&mut self, gc: &mut GameContext, dfa: &mut StateMachine, dt: f64) {
         self.remaining -= dt;
         if self.remaining < 0.0 {
-            self.done = true;
+            dfa.feed(StateTrans::Title);
         }
     }
 
@@ -72,21 +74,17 @@ impl GameState for OpeningState {
     }
 
     #[allow(unused_variables)]
-    fn on_input(&mut self, gc: &mut GameContext, input: &Input) {
+    fn on_input(&mut self, gc: &mut GameContext, dfa: &mut StateMachine, input: &Input) {
         match *input {
             Input::Press(Button::Keyboard(key)) => {
                 match key {
                     Key::Escape => {
-                        self.done = true;
+                        dfa.feed(StateTrans::Title);
                     }
                     _ => {}
                 }
             }
             _ => {}
         }
-    }
-
-    fn state_changed(&self) -> Option<State> {
-        if self.done { Some(State::Title) } else { None }
     }
 }

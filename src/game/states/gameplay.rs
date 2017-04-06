@@ -4,7 +4,7 @@ use std::cell::Cell;
 
 use piston_window::*;
 use map::*;
-use game::{GameContext, GameState, State};
+use game::{GameContext, GameState, StateTrans, StateMachine};
 use view::View;
 use geometry::*;
 
@@ -22,7 +22,7 @@ pub struct GamePlayState {
     cursor_region: Region,
     scroll: [Scroll; 2],
     mouse_scroll_lock: bool,
-    need_pause: Cell<bool>,
+    //need_pause: Cell<bool>,
     map_view: View,
     ui_view: View,
 }
@@ -35,7 +35,7 @@ impl GamePlayState {
             cursor_region: Region::new(Category::Neutral),
             scroll: [Scroll::None, Scroll::None],
             mouse_scroll_lock: false,
-            need_pause: Cell::new(false),
+            //need_pause: Cell::new(false),
             map_view: View::new(),
             ui_view: View::new(),
         }
@@ -43,7 +43,11 @@ impl GamePlayState {
 }
 
 impl GameState for GamePlayState {
-    fn on_update(&mut self, gc: &mut GameContext, dt: f64/* in seconds */) {
+    fn preserve_on_trans(&self) -> bool {
+        true
+    }
+
+    fn on_update(&mut self, gc: &mut GameContext, dfa: &mut StateMachine, dt: f64/* in seconds */) {
         self.map_view.set_size(gc.render_size[0] as f64, gc.render_size[1] as f64);
         let ds = gc.scroll_rate as f64 * dt;
         match self.scroll[0] {
@@ -77,7 +81,7 @@ impl GameState for GamePlayState {
         });
     }
 
-    fn on_input(&mut self, gc: &mut GameContext, input: &Input) {
+    fn on_input(&mut self, gc: &mut GameContext, dfa: &mut StateMachine, input: &Input) {
         match *input {
             Input::Move(m) => {
                 match m {
@@ -141,7 +145,7 @@ impl GameState for GamePlayState {
                     Button::Keyboard(key) => {
                         match key {
                             Key::Escape => {
-                                self.need_pause.set(true);
+                                dfa.feed(StateTrans::Pause);
                             }
                             Key::Up | Key::Down => {
                                 self.scroll[1] = Scroll::None;
@@ -162,15 +166,6 @@ impl GameState for GamePlayState {
                 }
             }
             _ => {}
-        }
-    }
-
-    fn state_changed(&self) -> Option<State> {
-        if self.need_pause.get() {
-            self.need_pause.set(false);
-            Some(State::Pause)
-        } else {
-            None
         }
     }
 }

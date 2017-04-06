@@ -2,25 +2,27 @@ extern crate piston_window;
 
 use piston_window::*;
 use piston_window::character::CharacterCache;
-use game::{GameContext, State, GameState};
+use game::{GameContext, StateTrans, GameState, StateMachine};
 
 pub struct PauseState {
-    done: bool,
     text: Text,
 }
 
 impl PauseState {
     pub fn new() -> Self {
         PauseState {
-            done: false,
             text: Text::new(22),
         }
     }
 }
 
 impl GameState for PauseState {
+    fn preserve_on_trans(&self) -> bool {
+        false
+    }
+    
     #[allow(unused_variables)]
-    fn on_update(&mut self, gc: &mut GameContext, dt: f64/* in seconds */) {
+    fn on_update(&mut self, gc: &mut GameContext, dfa: &mut StateMachine, dt: f64/* in seconds */) {
     }
 
     fn on_render(&mut self, gc: &mut GameContext, e: &Input, w: &mut PistonWindow) {
@@ -45,16 +47,12 @@ impl GameState for PauseState {
     }
 
     #[allow(unused_variables)]
-    fn on_input(&mut self, gc: &mut GameContext, input: &Input) {
+    fn on_input(&mut self, gc: &mut GameContext, dfa: &mut StateMachine, input: &Input) {
         match *input {
             Input::Release(Button::Keyboard(Key::Escape)) => {
-                self.done = true;
+                dfa.feed(StateTrans::Resume);
             }
             _ => {}
         }
-    }
-
-    fn state_changed(&self) -> Option<State> {
-        if self.done { Some(State::Resume) } else { None }
     }
 }

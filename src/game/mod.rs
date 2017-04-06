@@ -1,6 +1,6 @@
 mod game;
 mod state;
-mod states;
+pub mod states;
 
-pub use game::game::{Game, State, GameContext};
-pub use game::state::GameState;
+pub use game::game::{Game, GameContext};
+pub use game::state::{GameState, StateTrans, StateMachine};

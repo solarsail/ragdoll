@@ -2,14 +2,13 @@ extern crate piston_window;
 
 use piston_window::*;
 use piston_window::character::CharacterCache;
-use game::{GameContext, State, GameState};
+use game::{GameContext, StateTrans, GameState, StateMachine};
 
 
 static GAME_TITLE: &'static str = "Game Title";
 static PROMPT: &'static str = "Press Any Key";
 
 pub struct TitleState {
-    next_state: Option<State>,
     show_prompt: bool,
     timer: f64,
 }
@@ -17,7 +16,6 @@ pub struct TitleState {
 impl TitleState {
     pub fn new() -> Self {
         TitleState {
-            next_state: None,
             show_prompt: true,
             timer: 0.0,
         }
@@ -25,8 +23,12 @@ impl TitleState {
 }
 
 impl GameState for TitleState {
+    fn preserve_on_trans(&self) -> bool {
+        false
+    }
+    
     #[allow(unused_variables)]
-    fn on_update(&mut self, gc: &mut GameContext, dt: f64/* in seconds */) {
+    fn on_update(&mut self, gc: &mut GameContext, dfa: &mut StateMachine, dt: f64/* in seconds */) {
         self.timer += dt;
         if self.timer > 1.0 {
             self.show_prompt = !self.show_prompt;
@@ -54,16 +56,12 @@ impl GameState for TitleState {
     }
 
     #[allow(unused_variables)]
-    fn on_input(&mut self, gc: &mut GameContext, input: &Input) {
+    fn on_input(&mut self, gc: &mut GameContext, dfa: &mut StateMachine, input: &Input) {
         match *input {
             Input::Press(Button::Keyboard(_)) => {
-                self.next_state = Some(State::Gameplay);
+                dfa.feed(StateTrans::Gameplay);
             }
             _ => {}
         }
-    }
-
-    fn state_changed(&self) -> Option<State> {
-        self.next_state
     }
 }
