@@ -43,10 +43,6 @@ impl GamePlayState {
 }
 
 impl GameState for GamePlayState {
-    fn preserve_on_trans(&self) -> bool {
-        true
-    }
-
     fn on_update(&mut self, gc: &mut GameContext, dfa: &mut StateMachine, dt: f64/* in seconds */) {
         self.map_view.set_size(gc.render_size[0] as f64, gc.render_size[1] as f64);
         let ds = gc.scroll_rate as f64 * dt;

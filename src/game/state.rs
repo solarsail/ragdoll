@@ -12,7 +12,6 @@ pub trait GameState {
     fn on_update(&mut self, gc: &mut GameContext, dfa: &mut StateMachine, dt: f64);
     fn on_input(&mut self, gc: &mut GameContext, dfa: &mut StateMachine, input: &Input);
     fn on_render(&mut self, gc: &mut GameContext, e: &Input, w: &mut PistonWindow);
-    fn preserve_on_trans(&self) -> bool;
 }
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
@@ -59,6 +58,7 @@ impl StateMachine {
     pub fn set_initial(&mut self, i: usize) {
         self.initial = i;
         self.current = i;
+        self.ui_stack.push(i);
     }
 
 	pub fn feed(&mut self, action: StateTrans) {

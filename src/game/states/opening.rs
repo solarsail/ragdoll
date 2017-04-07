@@ -11,23 +11,14 @@ pub struct OpeningState {
     total: f64,
     remaining: f64,
     image: Image,
-    texture: G2dTexture,
-    //phantom: PhantomData<&'a i32>,
 }
 
 impl OpeningState {
-    pub fn new(t: f64, window: &mut PistonWindow) -> Self {
-        let img_path = default::assets_path().join("images").join("rust-logo.png");
+    pub fn new(t: f64) -> Self {
         OpeningState {
             total: t,
             remaining: t,
             image: Image::new().rect(square(0.0, 0.0, 200.0)),
-            texture: Texture::from_path(
-                &mut window.factory,
-                &img_path,
-                Flip::None,
-                &TextureSettings::new()).unwrap(),
-            //phantom: PhantomData,
         }
     }
 
@@ -44,10 +35,6 @@ impl OpeningState {
 }
 
 impl GameState for OpeningState {
-    fn preserve_on_trans(&self) -> bool {
-        false
-    }
-    
     #[allow(unused_variables)]
     fn on_update(&mut self, gc: &mut GameContext, dfa: &mut StateMachine, dt: f64) {
         self.remaining -= dt;
@@ -56,14 +43,13 @@ impl GameState for OpeningState {
         }
     }
 
-    #[allow(unused_variables)]
     fn on_render(&mut self, gc: &mut GameContext, e: &Input, w: &mut PistonWindow) {
         let x = gc.render_size[0] / 2 - 100;
         let y = gc.render_size[1] / 2 - 100;
         w.draw_2d(e, |c, g| {
             clear([0.0; 4], g);
             self.image.draw(
-                &self.texture,
+                gc.res.logo_texture(),
                 &c.draw_state,
                 c.transform.trans(x as f64, y as f64), g);
             rectangle(
@@ -76,7 +62,7 @@ impl GameState for OpeningState {
     #[allow(unused_variables)]
     fn on_input(&mut self, gc: &mut GameContext, dfa: &mut StateMachine, input: &Input) {
         match *input {
-            Input::Press(Button::Keyboard(key)) => {
+            Input::Release(Button::Keyboard(key)) => {
                 match key {
                     Key::Escape => {
                         dfa.feed(StateTrans::Title);

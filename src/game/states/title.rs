@@ -23,10 +23,6 @@ impl TitleState {
 }
 
 impl GameState for TitleState {
-    fn preserve_on_trans(&self) -> bool {
-        false
-    }
-    
     #[allow(unused_variables)]
     fn on_update(&mut self, gc: &mut GameContext, dfa: &mut StateMachine, dt: f64/* in seconds */) {
         self.timer += dt;
@@ -58,7 +54,7 @@ impl GameState for TitleState {
     #[allow(unused_variables)]
     fn on_input(&mut self, gc: &mut GameContext, dfa: &mut StateMachine, input: &Input) {
         match *input {
-            Input::Press(Button::Keyboard(_)) => {
+            Input::Release(Button::Keyboard(_)) => {
                 dfa.feed(StateTrans::Gameplay);
             }
             _ => {}

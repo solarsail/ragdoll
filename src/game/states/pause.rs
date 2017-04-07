@@ -17,10 +17,6 @@ impl PauseState {
 }
 
 impl GameState for PauseState {
-    fn preserve_on_trans(&self) -> bool {
-        false
-    }
-    
     #[allow(unused_variables)]
     fn on_update(&mut self, gc: &mut GameContext, dfa: &mut StateMachine, dt: f64/* in seconds */) {
     }
