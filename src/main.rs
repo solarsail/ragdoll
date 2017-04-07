@@ -32,7 +32,7 @@ fn main() {
     let mut states: Vec<Box<GameState>> = Vec::new();
     let mut dfa = StateMachine::new();
 
-    let opening = dfa.add_state(&mut states, Box::new(OpeningState::new(4.0)), false);
+    let opening = dfa.add_state(&mut states, Box::new(OpeningState::new(4.0, 200, 200)), false);
     let title = dfa.add_state(&mut states, Box::new(TitleState::new()), false);
     let pause = dfa.add_state(&mut states, Box::new(PauseState::new()), false);
     let map = HexMap::new(5);

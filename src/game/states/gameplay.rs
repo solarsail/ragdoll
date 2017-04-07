@@ -1,7 +1,5 @@
 extern crate piston_window;
 
-use std::cell::Cell;
-
 use piston_window::*;
 use map::*;
 use game::{GameContext, GameState, StateTrans, StateMachine};
@@ -22,7 +20,6 @@ pub struct GamePlayState {
     cursor_region: Region,
     scroll: [Scroll; 2],
     mouse_scroll_lock: bool,
-    //need_pause: Cell<bool>,
     map_view: View,
     ui_view: View,
 }
@@ -35,7 +32,6 @@ impl GamePlayState {
             cursor_region: Region::new(Category::Neutral),
             scroll: [Scroll::None, Scroll::None],
             mouse_scroll_lock: false,
-            //need_pause: Cell::new(false),
             map_view: View::new(),
             ui_view: View::new(),
         }

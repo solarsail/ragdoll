@@ -1,8 +1,7 @@
 extern crate piston_window;
 
-use std::marker::PhantomData;
 use piston_window::*;
-use piston_window::rectangle::square;
+use piston_window::rectangle::rectangle_by_corners;
 use game::{GameContext, GameState, StateTrans, StateMachine};
 use default;
 
@@ -11,14 +10,18 @@ pub struct OpeningState {
     total: f64,
     remaining: f64,
     image: Image,
+    logo_width: u32,
+    logo_height: u32,
 }
 
 impl OpeningState {
-    pub fn new(t: f64) -> Self {
+    pub fn new(t: f64, logo_width: u32, logo_height: u32) -> Self {
         OpeningState {
             total: t,
             remaining: t,
-            image: Image::new().rect(square(0.0, 0.0, 200.0)),
+            image: Image::new().rect(rectangle_by_corners(0.0, 0.0, logo_width as f64, logo_height as f64)),
+            logo_width: logo_width,
+            logo_height: logo_height,
         }
     }
 
@@ -44,8 +47,8 @@ impl GameState for OpeningState {
     }
 
     fn on_render(&mut self, gc: &mut GameContext, e: &Input, w: &mut PistonWindow) {
-        let x = gc.render_size[0] / 2 - 100;
-        let y = gc.render_size[1] / 2 - 100;
+        let x = (gc.render_size[0] - self.logo_width) / 2;
+        let y = (gc.render_size[1] - self.logo_height) / 2;
         w.draw_2d(e, |c, g| {
             clear([0.0; 4], g);
             self.image.draw(
