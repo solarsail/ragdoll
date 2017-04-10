@@ -6,3 +6,6 @@ authors = ["solarsail"]
 [dependencies]
 piston_window = "0.63.0"
 find_folder = "*"
+hexgrid = { path = "hexgrid" }
+
+[workspace]

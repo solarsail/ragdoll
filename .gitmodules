@@ -1,0 +1,3 @@
+[submodule "hexgrid"]
+	path = hexgrid
+	url = git@github.com:solarsail/hexgrid.git

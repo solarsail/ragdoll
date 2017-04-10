@@ -1,4 +1,5 @@
-use geometry::*;
+use piston_window::math::{Matrix2d, translate, overlap_rectangle};
+
 
 #[derive(Debug)]
 pub struct View {
@@ -48,6 +49,6 @@ impl View {
 	}
 
 	pub fn filter(&self, rect: [f64; 4]) -> bool {
-		rect_intersect(self.rect, rect)
+		overlap_rectangle(self.rect, rect).is_some()
 	}
 }

@@ -5,7 +5,7 @@ use std::cmp::{max, min};
 
 use piston_window::{Context, G2d};
 
-use map::Layout;
+use hexgrid::Layout;
 use map::mapcell::MapCell;
 use view::View;
 
@@ -37,7 +37,7 @@ impl HexMap {
     }
 
     pub fn draw(&self, l: &Layout, v: &View, c: Context, g: &mut G2d) {
-        for cell in self.content.iter().filter(|c| v.filter(c.bounding_box(l))) {
+        for cell in self.content.iter().filter(|c| v.filter(l.bounding_box_of(c.coordinates()))) {
             cell.draw(l, c, g);
         }
     }

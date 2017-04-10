@@ -1,12 +1,10 @@
-extern crate piston_window;
-
 use std::collections::HashSet;
 
 use piston_window::{Context, G2d};
 use piston_window::polygon::*;
 use piston_window::line::*;
 
-use map::{Hex, Edge, Layout};
+use hexgrid::{Coordinates, EdgeCoordinates, Layout, PointPair};
 
 
 pub enum Category {
@@ -27,7 +25,7 @@ fn type_color(category: &Category) -> [f32; 4] {
 
 pub struct Region {
     category: Category,
-    cells: HashSet<Hex>,
+    cells: HashSet<Coordinates>,
 }
 
 impl Region {
@@ -38,8 +36,8 @@ impl Region {
         }
     }
 
-    pub fn push(&mut self, hex: Hex) {
-        self.cells.insert(hex);
+    pub fn push(&mut self, c: Coordinates) {
+        self.cells.insert(c);
     }
 
     pub fn clear(&mut self) {
@@ -49,18 +47,18 @@ impl Region {
     pub fn draw(&self, l: &Layout, c: Context, g: &mut G2d) {
         let border = Line::new([0.2, 0.2, 0.2, 0.5], 1.0);
         let fill = Polygon::new(type_color(&self.category));
-        let mut edges: HashSet<Edge> = HashSet::new();
+        let mut edges: HashSet<EdgeCoordinates> = HashSet::new();
         // 遍历包含的所有网格
         for hex in self.cells.iter() {
             // 计算轮廓
-            let candidates: HashSet<_> = hex.edges().iter().cloned().collect();
+            let candidates: HashSet<EdgeCoordinates> = hex.adjacent_edges().into_iter().collect();
             edges = edges.symmetric_difference(&candidates).cloned().collect();
             // 绘制填充
-            fill.draw(&hex.vertices(l), &c.draw_state, c.transform, g);
+            fill.draw(&l.vertices_of_hex(*hex).iter().map(|p| p.into()).collect::<Vec<[f64;2]>>(), &c.draw_state, c.transform, g);
         }
         // 绘制轮廓
         for edge in edges.iter() {
-            border.draw(edge.vertices(l), &c.draw_state, c.transform, g);
+            border.draw(l.vertices_of_edge(*edge), &c.draw_state, c.transform, g);
         }
     }
 }

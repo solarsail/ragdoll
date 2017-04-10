@@ -1,9 +1,9 @@
 extern crate piston_window;
+extern crate hexgrid;
 
 mod default;
 mod map;
 mod game;
-mod geometry;
 mod view;
 mod settings;
 mod resource;
@@ -14,6 +14,7 @@ use game::states::{OpeningState, GamePlayState, TitleState, PauseState};
 use game::{StateTrans, StateMachine, Game, GameState};
 use settings::*;
 use map::*;
+use hexgrid::{Layout, POINTY_TOP};
 
 fn main() {
     let settings = Settings::load("settings.ini");

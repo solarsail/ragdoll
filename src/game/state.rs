@@ -1,8 +1,4 @@
-extern crate piston_window;
-
 use std::collections::HashMap;
-use std::cell::{RefCell, RefMut};
-use std::ops::DerefMut;
 use std::slice::Iter;
 use piston_window::*;
 use game::GameContext;

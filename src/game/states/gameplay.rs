@@ -1,10 +1,9 @@
-extern crate piston_window;
-
 use piston_window::*;
+use piston_window::math::transform_pos;
 use map::*;
 use game::{GameContext, GameState, StateTrans, StateMachine};
 use view::View;
-use geometry::*;
+use hexgrid::*;
 
 #[derive(PartialEq, Eq)]
 enum Scroll {
@@ -100,7 +99,7 @@ impl GameState for GamePlayState {
                 match btn {
                     Button::Mouse(MouseButton::Left) => {
                         let cursor_world_coord = transform_pos(self.map_view.s2w_trans, gc.cursor_screen_coord);
-                        let hex = Hex::from_pixel(cursor_world_coord, &self.layout);
+                        let hex = self.layout.coord_at(cursor_world_coord);
                         self.cursor_region.push(hex);
                     }
                     Button::Keyboard(key) => {
