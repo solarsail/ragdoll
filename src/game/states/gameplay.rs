@@ -1,5 +1,3 @@
-use piston_window::*;
-use piston_window::math::transform_pos;
 use map::*;
 use game::{GameContext, GameState, StateTrans, StateMachine};
 use view::View;
@@ -62,17 +60,13 @@ impl GameState for GamePlayState {
     }
 
     #[allow(unused_variables)]
-    fn on_render(&mut self, gc: &mut GameContext, e: &Input, w: &mut PistonWindow) {
-        w.draw_2d(e, |c, g| {
-            clear([1.0; 4], g);
-            let c = c.append_transform(self.map_view.w2s_trans);
+    fn on_render(&mut self, gc: &mut GameContext, r: &mut Renderer) {
             // TODO: culling: use view or draw_state.scissor? how to use it?
-            self.map.draw(&self.layout, &self.map_view, c, g);
-            self.cursor_region.draw(&self.layout, c, g);
-        });
+            self.map.draw(&self.layout, &self.map_view, r);
+            self.cursor_region.draw(&self.layout, &self.map_view, r);
     }
 
-    fn on_input(&mut self, gc: &mut GameContext, dfa: &mut StateMachine, input: &Input) {
+    fn on_input(&mut self, gc: &mut GameContext, dfa: &mut StateMachine, input: &Event) {
         match *input {
             Input::Move(m) => {
                 match m {
