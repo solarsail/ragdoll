@@ -1,3 +1,5 @@
+use sdl2::render::Renderer;
+use sdl2::keyboard::Keycode;
 use map::*;
 use game::{GameContext, GameState, StateTrans, StateMachine};
 use view::View;
@@ -7,9 +9,6 @@ use hexgrid::*;
 enum Scroll {
     None, Left, Right, Up, Down
 }
-
-const SCROLL_AREA: f64 = 5.0;
-
 
 pub struct GamePlayState {
     map: HexMap,
@@ -36,9 +35,9 @@ impl GamePlayState {
 }
 
 impl GameState for GamePlayState {
-    fn on_update(&mut self, gc: &mut GameContext, dfa: &mut StateMachine, dt: f64/* in seconds */) {
-        self.map_view.set_size(gc.render_size[0] as f64, gc.render_size[1] as f64);
-        let ds = gc.scroll_rate as f64 * dt;
+    fn on_update(&mut self, ctx: &mut GameContext, dfa: &mut StateMachine, dt: f64/* in seconds */) {
+        self.map_view.set_size(ctx.render_size[0] as f64, ctx.render_size[1] as f64);
+        let ds = ctx.scroll_rate as f64 * dt;
         match self.scroll[0] {
             Scroll::Left => {
                 self.map_view.trans_self(-ds, 0.0);
@@ -60,97 +59,39 @@ impl GameState for GamePlayState {
     }
 
     #[allow(unused_variables)]
-    fn on_render(&mut self, gc: &mut GameContext, r: &mut Renderer) {
+    fn on_render(&mut self, ctx: &mut GameContext, r: &mut Renderer) {
             // TODO: culling: use view or draw_state.scissor? how to use it?
-            self.map.draw(&self.layout, &self.map_view, r);
-            self.cursor_region.draw(&self.layout, &self.map_view, r);
+            //self.map.draw(&self.layout, &self.map_view, r);
+            //self.cursor_region.draw(&self.layout, &self.map_view, r);
     }
 
-    fn on_input(&mut self, gc: &mut GameContext, dfa: &mut StateMachine, input: &Event) {
-        match *input {
-            Input::Move(m) => {
-                match m {
-                    Motion::MouseCursor(x, y) if !self.mouse_scroll_lock => {
-                        if x < SCROLL_AREA {
-                            self.scroll[0] = Scroll::Left;
-                        } else if x > gc.render_size[0] as f64 - SCROLL_AREA {
-                            self.scroll[0] = Scroll::Right;
-                        } else {
-                            self.scroll[0] = Scroll::None;
-                        }
-                        if y < SCROLL_AREA && y > 0.0 {
-                            self.scroll[1] = Scroll::Up;
-                        } else if y > gc.render_size[1] as f64 - SCROLL_AREA {
-                            self.scroll[1] = Scroll::Down;
-                        } else {
-                            self.scroll[1] = Scroll::None;
-                        }
-                    }
-                    _ => {}
-                }
+    fn on_input(&mut self, ctx: &mut GameContext, dfa: &mut StateMachine) {
+        for key in ctx.key_triggers.iter() {
+            if key == Keycode::Escape {
+                dfa.feed(StateTrans::Pause);
             }
-            Input::Press(btn) => {
-                match btn {
-                    Button::Mouse(MouseButton::Left) => {
-                        let cursor_world_coord = transform_pos(self.map_view.s2w_trans, gc.cursor_screen_coord);
-                        let hex = self.layout.coord_at(cursor_world_coord);
-                        self.cursor_region.push(hex);
-                    }
-                    Button::Keyboard(key) => {
-                        match key {
-                            Key::Up | Key::Down | Key::Left | Key::Right => {
-                                self.mouse_scroll_lock = true;
-                            }
-                            _ => {}
-                        }
-                        match key {
-                            Key::Up => {
-                                self.scroll[1] = Scroll::Up;
-                            }
-                            Key::Down => {
-                                self.scroll[1] = Scroll::Down;
-                            }
-                            Key::Left => {
-                                self.scroll[0] = Scroll::Left;
-                            }
-                            Key::Right => {
-                                self.scroll[0] = Scroll::Right;
-                            }
-                            _ => {}
-                        }
-                    }
-                    _ => {}
-                }
+        }
+
+        if let Some(state) = ctx.key_states.get(Keycode::Left) {
+            self.scroll[0] = if state { Scroll::Left } else { Scroll::None };
+        }
+        if let Some(state) = ctx.key_states.get(Keycode::Right) {
+            self.scroll[0] = if state { Scroll::Right } else { Scroll::None };
+        }
+        if let Some(state) = ctx.key_states.get(Keycode::Up) {
+            self.scroll[1] = if state { Scroll::Up } else { Scroll::None };
+        }
+        if let Some(state) = ctx.key_states.get(Keycode::Down) {
+            self.scroll[1] = if state { Scroll::Down } else { Scroll::None };
+        }
+        if let Some(state) = ctx.mouse_state.get(MouseButton::Left) {
+            if state {
+                let cursor_world_coord = transform_pos(self.map_view.s2w_trans, ctx.cursor_screen_coord);
+                let hex = self.layout.coord_at(cursor_world_coord);
+                self.cursor_region.push(hex);
+            } else {
+                self.cursor_region.clear();
             }
-            Input::Release(btn) => {
-                match btn {
-                    Button::Mouse(MouseButton::Left) => {
-                        self.cursor_region.clear();
-                    }
-                    Button::Keyboard(key) => {
-                        match key {
-                            Key::Escape => {
-                                dfa.feed(StateTrans::Pause);
-                            }
-                            Key::Up | Key::Down => {
-                                self.scroll[1] = Scroll::None;
-                                if self.scroll[0] == Scroll::None {
-                                    self.mouse_scroll_lock = false;
-                                }
-                            }
-                            Key::Left | Key::Right => {
-                                self.scroll[0] = Scroll::None;
-                                if self.scroll[1] == Scroll::None {
-                                    self.mouse_scroll_lock = false;
-                                }
-                            }
-                            _ => {}
-                        }
-                    }
-                    _ => {}
-                }
-            }
-            _ => {}
         }
     }
 }

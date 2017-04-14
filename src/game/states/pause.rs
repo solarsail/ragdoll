@@ -1,7 +1,7 @@
-extern crate piston_window;
-
-use piston_window::*;
-use piston_window::character::CharacterCache;
+use sdl2::render::Renderer;
+use sdl2::keyboard::Keycode;
+use sdl2::pixels::Color;
+use sdl2::rect::Rect;
 use game::{GameContext, StateTrans, GameState, StateMachine};
 
 pub struct PauseState {
@@ -18,37 +18,28 @@ impl PauseState {
 
 impl GameState for PauseState {
     #[allow(unused_variables)]
-    fn on_update(&mut self, gc: &mut GameContext, dfa: &mut StateMachine, dt: f64/* in seconds */) {
+    fn on_update(&mut self, ctx: &mut GameContext, dfa: &mut StateMachine, dt: f64/* in seconds */) {
     }
 
-    fn on_render(&mut self, gc: &mut GameContext, e: &Input, w: &mut PistonWindow) {
-        let center_x = gc.render_size[0] as f64 / 2.;
-        let center_y = gc.render_size[1] as f64 / 2.;
-        w.draw_2d(e, |c, g| {
-            let font = gc.res.font();
-            let str_width = font.width(22, "PAUSED");
-            rectangle(
-                [0.0, 0.0, 0.0, 0.4],
-                [0.0, 0.0, gc.render_size[0] as f64, gc.render_size[1] as f64],
-                c.transform, g);
-            rectangle(
-                [1.0, 1.0, 1.0, 0.8],
-                [center_x, center_y, 200.0, 100.0],
-                c.transform.trans(-100., -50.), g);
-            self.text.draw("PAUSED",
-                font,
-                &c.draw_state,
-                c.transform.trans(center_x - str_width/2., center_y), g);
-        });
+    fn on_render(&mut self, ctx: &mut GameContext, r: &mut Renderer) {
+        let center_x = ctx.render_size[0] / 2;
+        let center_y = ctx.render_size[1] / 2;
+        let surface = ctx.res.caption_font().render("PAUSED").blended(Color::RGBA(255, 87, 0, 255)).unwrap();
+        let mut texture = r.create_texture_from_surface(&surface).unwrap();
+
+        r.set_draw_color(Color::RGBA(0, 0, 0, 102));
+        r.fill_rect(None).unwrap();
+        r.set_draw_color(Color::RGBA(255, 255, 255, 204));
+        r.fill_rect(Some(Rect::new(center_x - 100, center_y - 50, 200, 100))).unwrap();
+        r.copy(&mut texture, None, Some(Rect::new(center_x - texture.width / 2, center_y, texture.width, texture.height))).unwrap();
     }
 
-    #[allow(unused_variables)]
-    fn on_input(&mut self, gc: &mut GameContext, dfa: &mut StateMachine, input: &Input) {
-        match *input {
-            Input::Release(Button::Keyboard(Key::Escape)) => {
+    fn on_input(&mut self, ctx: &mut GameContext, dfa: &mut StateMachine) {
+        for key in ctx.key_triggers.iter() {
+            if key == Keycode::Escape { // TODO: 使用自定义类型解耦？
                 dfa.feed(StateTrans::Resume);
+                break;
             }
-            _ => {}
         }
     }
 }

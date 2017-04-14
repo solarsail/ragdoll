@@ -6,9 +6,9 @@ use game::GameContext;
 
 
 pub trait GameState {
-    fn on_update(&mut self, gc: &mut GameContext, dfa: &mut StateMachine, dt: f64);
-    fn on_input(&mut self, gc: &mut GameContext, dfa: &mut StateMachine, input: &Event);
-    fn on_render(&mut self, gc: &mut GameContext, w: &mut Renderer);
+    fn on_update(&mut self, ctx: &mut GameContext, dfa: &mut StateMachine, dt: f64);
+    fn on_input(&mut self, ctx: &mut GameContext, dfa: &mut StateMachine);
+    fn on_render(&mut self, ctx: &mut GameContext, w: &mut Renderer);
 }
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]

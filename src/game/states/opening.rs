@@ -1,7 +1,7 @@
-extern crate piston_window;
-
-use piston_window::*;
-use piston_window::rectangle::rectangle_by_corners;
+use sdl2::render::Renderer;
+use sdl2::keyboard::Keycode;
+use sdl2::pixels::Color;
+use sdl2::rect::Rect;
 use game::{GameContext, GameState, StateTrans, StateMachine};
 use default;
 
@@ -39,41 +39,28 @@ impl OpeningState {
 
 impl GameState for OpeningState {
     #[allow(unused_variables)]
-    fn on_update(&mut self, gc: &mut GameContext, dfa: &mut StateMachine, dt: f64) {
+    fn on_update(&mut self, ctx: &mut GameContext, dfa: &mut StateMachine, dt: f64) {
         self.remaining -= dt;
         if self.remaining < 0.0 {
             dfa.feed(StateTrans::Title);
         }
     }
 
-    fn on_render(&mut self, gc: &mut GameContext, e: &Input, w: &mut PistonWindow) {
-        let x = (gc.render_size[0] - self.logo_width) / 2;
-        let y = (gc.render_size[1] - self.logo_height) / 2;
-        w.draw_2d(e, |c, g| {
-            clear([0.0; 4], g);
-            self.image.draw(
-                gc.res.logo_texture(),
-                &c.draw_state,
-                c.transform.trans(x as f64, y as f64), g);
-            rectangle(
-                [0.0, 0.0, 0.0, self.mask_alpha()],
-                [0.0, 0.0, gc.render_size[0] as f64, gc.render_size[1] as f64],
-                c.transform, g);
-        });
+    fn on_render(&mut self, ctx: &mut GameContext, r: &mut Renderer) {
+        let x = (ctx.render_size[0] - self.logo_width) / 2;
+        let y = (ctx.render_size[1] - self.logo_height) / 2;
+        let rect = Rect::new(x, y, self.logo_width, self.logo_height);
+        r.copy(ctx.res.logo_texture(), None, Some(rect)).unwrap();
+        r.set_draw_color(Color::RGBA(0, 0, 0, self.mask_alpha()));
+        r.fill_rect(Some(rect));
     }
 
-    #[allow(unused_variables)]
-    fn on_input(&mut self, gc: &mut GameContext, dfa: &mut StateMachine, input: &Input) {
-        match *input {
-            Input::Release(Button::Keyboard(key)) => {
-                match key {
-                    Key::Escape => {
-                        dfa.feed(StateTrans::Title);
-                    }
-                    _ => {}
-                }
+    fn on_input(&mut self, ctx: &mut GameContext, dfa: &mut StateMachine) {
+        for key in ctx.key_triggers.iter() {
+            if key == Keycode::Escape { // TODO: 使用自定义类型解耦？
+                dfa.feed(StateTrans::Title);
+                break;
             }
-            _ => {}
         }
     }
 }

@@ -1,9 +1,5 @@
 use std::collections::HashSet;
 
-use piston_window::{Context, G2d};
-use piston_window::polygon::*;
-use piston_window::line::*;
-
 use hexgrid::{Coordinates, EdgeCoordinates, Layout, PointPair};
 
 

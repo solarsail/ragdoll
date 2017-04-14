@@ -1,5 +1,6 @@
-extern crate piston_window;
+extern crate sdl2;
 extern crate hexgrid;
+extern crate find_folder;
 
 mod default;
 mod map;
@@ -7,8 +8,6 @@ mod game;
 mod view;
 mod settings;
 mod resource;
-
-use piston_window::*;
 
 use game::states::{OpeningState, GamePlayState, TitleState, PauseState};
 use game::{StateTrans, StateMachine, Game, GameState};
@@ -20,15 +19,6 @@ fn main() {
     let settings = Settings::load("settings.ini");
     let wsize = [settings.window_width, settings.window_height];
 
-    //let opengl = OpenGL::V3_2;
-    let mut window: PistonWindow =
-        WindowSettings::new("ragdoll", wsize)
-        .samples(4)
-        //.opengl(opengl)
-        .exit_on_esc(false)
-        .build().unwrap();
-
-    let mut res = resource::Resources::new(&mut window);
 
     let mut states: Vec<Box<GameState>> = Vec::new();
     let mut dfa = StateMachine::new();
@@ -47,7 +37,7 @@ fn main() {
     dfa.add_trans(gameplay, pause, StateTrans::Pause);
     dfa.add_trans(pause, gameplay, StateTrans::Resume);
 
-    let mut game = Game::new(settings, &mut window, &mut res, &mut dfa, &mut states);
+    let mut game = Game::new(settings, "title", &mut dfa, &mut states);
 
     game.run();
 }

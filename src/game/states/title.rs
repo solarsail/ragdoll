@@ -1,7 +1,7 @@
-extern crate piston_window;
-
-use piston_window::*;
-use piston_window::character::CharacterCache;
+use sdl2::render::Renderer;
+use sdl2::keyboard::Keycode;
+use sdl2::pixels::Color;
+use sdl2::rect::Rect;
 use game::{GameContext, StateTrans, GameState, StateMachine};
 
 
@@ -24,7 +24,7 @@ impl TitleState {
 
 impl GameState for TitleState {
     #[allow(unused_variables)]
-    fn on_update(&mut self, gc: &mut GameContext, dfa: &mut StateMachine, dt: f64/* in seconds */) {
+    fn on_update(&mut self, ctx: &mut GameContext, dfa: &mut StateMachine, dt: f64/* in seconds */) {
         self.timer += dt;
         if self.timer > 1.0 {
             self.show_prompt = !self.show_prompt;
@@ -32,32 +32,23 @@ impl GameState for TitleState {
         }
     }
 
-    fn on_render(&mut self, gc: &mut GameContext, e: &Input, w: &mut PistonWindow) {
-        let center_x = gc.render_size[0] as f64 / 2.;
-        let center_y = gc.render_size[1] as f64 / 2.;
-        let title_text = Text::new_color([1.0; 4], 30);
-        let prompt_text = Text::new_color([0.8, 0.8, 0.8, 1.0], 22);
-        w.draw_2d(e, |c, g| {
-            let font = gc.res.font();
-            let title_width = font.width(30, GAME_TITLE);
-            let prompt_width = font.width(22, PROMPT);
-            clear([0.0, 0.0, 0.0, 1.0], g);
-            title_text.draw(GAME_TITLE, font, &c.draw_state,
-                c.transform.trans(center_x - title_width/2., center_y - 100.), g);
-            if self.show_prompt {
-                prompt_text.draw(PROMPT, font, &c.draw_state,
-                    c.transform.trans(center_x - prompt_width/2., center_y + 30.), g);
-            }
-        });
+    fn on_render(&mut self, ctx: &mut GameContext, r: &mut Renderer) {
+        let center_x = ctx.render_size[0] / 2;
+        let center_y = ctx.render_size[1] / 2;
+        let surface = ctx.res.title_font().render(GAME_TITLE).blended(Color::RGBA(255, 87, 0, 255)).unwrap();
+        let mut title_texture = r.create_texture_from_surface(&surface).unwrap();
+        let surface = ctx.res.caption_font().render(PROMPT).blended(Color::RGBA(200, 200, 200, 255)).unwrap();
+        let mut prompt_texture = r.create_texture_from_surface(&surface).unwrap();
+        r.copy(&mut title_texture, None, Some(Rect::new(center_x - title_texture.width / 2, center_y - 100, title_texture.width, title_texture.height))).unwrap();
+        if self.show_prompt {
+            r.copy(&mut prompt_texture, None, Some(Rect::new(center_x - prompt_texture.width / 2, center_y + 30, prompt_texture.width, prompt_texture.height))).unwrap();
+        }
     }
 
-    #[allow(unused_variables)]
-    fn on_input(&mut self, gc: &mut GameContext, dfa: &mut StateMachine, input: &Input) {
-        match *input {
-            Input::Release(Button::Keyboard(_)) => {
-                dfa.feed(StateTrans::Gameplay);
-            }
-            _ => {}
+    fn on_input(&mut self, ctx: &mut GameContext, dfa: &mut StateMachine) {
+        for _ in ctx.key_triggers.iter() {
+            dfa.feed(StateTrans::Gameplay);
+            break;
         }
     }
 }

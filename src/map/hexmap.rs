@@ -1,9 +1,5 @@
-extern crate piston_window;
-
 use std::collections::HashSet;
 use std::cmp::{max, min};
-
-use piston_window::{Context, G2d};
 
 use hexgrid::Layout;
 use map::mapcell::MapCell;

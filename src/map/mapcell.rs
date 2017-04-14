@@ -14,7 +14,7 @@ impl MapCell {
         MapCell { coord: Coordinates::at(q, r) }
     }
 
-    pub fn draw(&self, l: &Layout, c: Context, g: &mut G2d) {
+    pub fn draw(&self, l: &Layout, r: &mut Renderer) {
         let fill = Polygon::new([0.5, 0.5, 0.5, 0.4]);
         fill.draw(&l.vertices_of_hex(self.coord).iter().map(|p| p.into()).collect::<Vec<[f64;2]>>(), &c.draw_state, c.transform, g);
         /*

@@ -1,5 +1,3 @@
-extern crate piston_window;
-
 mod region;
 mod mapcell;
 mod hexmap;

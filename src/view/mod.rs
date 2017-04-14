@@ -1,5 +1,3 @@
-use piston_window::math::{Matrix2d, translate, overlap_rectangle};
-
 
 #[derive(Debug)]
 pub struct View {
