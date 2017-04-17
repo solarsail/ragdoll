@@ -9,7 +9,6 @@ use default;
 pub struct OpeningState {
     total: f64,
     remaining: f64,
-    image: Image,
     logo_width: u32,
     logo_height: u32,
 }
@@ -19,7 +18,6 @@ impl OpeningState {
         OpeningState {
             total: t,
             remaining: t,
-            image: Image::new().rect(rectangle_by_corners(0.0, 0.0, logo_width as f64, logo_height as f64)),
             logo_width: logo_width,
             logo_height: logo_height,
         }

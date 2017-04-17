@@ -1,6 +1,7 @@
 extern crate sdl2;
 extern crate hexgrid;
 extern crate find_folder;
+extern crate nalgebra as na;
 
 mod default;
 mod map;

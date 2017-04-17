@@ -1,5 +1,6 @@
 use sdl2::render::Renderer;
 use sdl2::keyboard::Keycode;
+use sdl2::mouse::MouseButton;
 use map::*;
 use game::{GameContext, GameState, StateTrans, StateMachine};
 use view::View;
@@ -86,6 +87,7 @@ impl GameState for GamePlayState {
         }
         if let Some(state) = ctx.mouse_state.get(MouseButton::Left) {
             if state {
+                // TODO: use nalgebra to make translation
                 let cursor_world_coord = transform_pos(self.map_view.s2w_trans, ctx.cursor_screen_coord);
                 let hex = self.layout.coord_at(cursor_world_coord);
                 self.cursor_region.push(hex);

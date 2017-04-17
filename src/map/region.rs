@@ -1,5 +1,6 @@
 use std::collections::HashSet;
 
+use sdl2::render::Renderer;
 use hexgrid::{Coordinates, EdgeCoordinates, Layout, PointPair};
 
 
@@ -40,9 +41,9 @@ impl Region {
         self.cells.clear();
     }
 
-    pub fn draw(&self, l: &Layout, c: Context, g: &mut G2d) {
-        let border = Line::new([0.2, 0.2, 0.2, 0.5], 1.0);
-        let fill = Polygon::new(type_color(&self.category));
+    pub fn draw(&self, l: &Layout, r: &mut Renderer) {
+        //let border = Line::new([0.2, 0.2, 0.2, 0.5], 1.0);
+        //let fill = Polygon::new(type_color(&self.category));
         let mut edges: HashSet<EdgeCoordinates> = HashSet::new();
         // 遍历包含的所有网格
         for hex in self.cells.iter() {
@@ -50,11 +51,11 @@ impl Region {
             let candidates: HashSet<EdgeCoordinates> = hex.adjacent_edges().into_iter().collect();
             edges = edges.symmetric_difference(&candidates).cloned().collect();
             // 绘制填充
-            fill.draw(&l.vertices_of_hex(*hex).iter().map(|p| p.into()).collect::<Vec<[f64;2]>>(), &c.draw_state, c.transform, g);
+            //fill.draw(&l.vertices_of_hex(*hex).iter().map(|p| p.into()).collect::<Vec<[f64;2]>>(), &c.draw_state, c.transform, g);
         }
         // 绘制轮廓
         for edge in edges.iter() {
-            border.draw(l.vertices_of_edge(*edge), &c.draw_state, c.transform, g);
+            //border.draw(l.vertices_of_edge(*edge), &c.draw_state, c.transform, g);
         }
     }
 }

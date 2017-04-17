@@ -1,6 +1,8 @@
 use std::collections::HashSet;
 use std::cmp::{max, min};
 
+use sdl2::render::Renderer;
+
 use hexgrid::Layout;
 use map::mapcell::MapCell;
 use view::View;
@@ -34,7 +36,7 @@ impl HexMap {
 
     pub fn draw(&self, l: &Layout, v: &View, r: &mut Renderer) {
         for cell in self.content.iter().filter(|c| v.filter(l.bounding_box_of(c.coordinates()))) {
-            cell.draw(l, c, g);
+            // TODO
         }
     }
 }

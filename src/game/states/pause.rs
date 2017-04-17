@@ -5,13 +5,13 @@ use sdl2::rect::Rect;
 use game::{GameContext, StateTrans, GameState, StateMachine};
 
 pub struct PauseState {
-    text: Text,
+    //text: Text,
 }
 
 impl PauseState {
     pub fn new() -> Self {
         PauseState {
-            text: Text::new(22),
+            //text: Text::new(22),
         }
     }
 }

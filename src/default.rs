@@ -1,4 +1,5 @@
 use std::path::PathBuf;
+use find_folder;
 
 
 pub fn assets_path() -> PathBuf {

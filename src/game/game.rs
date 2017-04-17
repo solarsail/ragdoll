@@ -9,6 +9,8 @@ use sdl2::keyboard::Keycode;
 use sdl2::mouse::MouseButton;
 use sdl2::pixels::Color;
 
+use na::geometry::Point2;
+
 use settings::*;
 use game::{GameState, StateMachine};
 use game::states::*;
@@ -18,8 +20,8 @@ use resource::Resources;
 const FPS: i32 = 60;
 
 /// 每帧不同阶段间所使用或传递的状态与资源。
-pub struct GameContext<'a> {
-    pub cursor_screen_coord: [f64; 2],
+pub struct GameContext {
+    pub cursor_screen_coord: Point2<f64>,
     pub key_states: HashMap<Keycode, bool>,
     pub key_triggers: Vec<Keycode>,
     pub mouse_states: HashMap<MouseButton, bool>,
@@ -29,7 +31,7 @@ pub struct GameContext<'a> {
 }
 
 pub struct Game<'a> {
-    context: GameContext<'a>,
+    context: GameContext,
     dfa: &'a mut StateMachine,
     states: &'a mut Vec<Box<GameState>>,
     renderer: Renderer,
@@ -57,7 +59,7 @@ impl<'a> Game<'a> {
                 render_size: [settings.window_width, settings.window_height],
                 cursor_screen_coord: [0.0, 0.0],
                 scroll_rate: settings.scroll_rate,
-                res: resource::Resources::new(&mut renderer),
+                res: Resources::new(&mut renderer),
             },
             renderer: renderer,
             event_pump: event_pump,
@@ -152,7 +154,7 @@ impl<'a> Game<'a> {
 
             let frame_time = time::Instant::now() - frame_start;
             if frame_time < time_per_frame {
-                std::thread::sleep(time_per_frame - frame_time);
+                thread::sleep(time_per_frame - frame_time);
             }
         }
     }

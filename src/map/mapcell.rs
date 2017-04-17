@@ -1,6 +1,4 @@
-use piston_window::{Context, G2d};
-use piston_window::polygon::*;
-//use piston_window::line::*;
+use sdl2::render::Renderer;
 use hexgrid::{Coordinates, Layout, POINTY_TOP, Point, PointPair};
 
 
@@ -15,14 +13,7 @@ impl MapCell {
     }
 
     pub fn draw(&self, l: &Layout, r: &mut Renderer) {
-        let fill = Polygon::new([0.5, 0.5, 0.5, 0.4]);
-        fill.draw(&l.vertices_of_hex(self.coord).iter().map(|p| p.into()).collect::<Vec<[f64;2]>>(), &c.draw_state, c.transform, g);
-        /*
-        let border = Line::new([0.2, 0.2, 0.2, 1.0], 0.5);
-        for edge in layout.all_edges_of_hex(self.coord).iter() {
-            border.draw(edge, &DEFAULT_DRAW_STATE, c.transform, g);
-        }
-        */
+        // TODO
     }
 
     pub fn coordinates(&self) -> Coordinates {
