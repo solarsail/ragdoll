@@ -1,4 +1,4 @@
-use na::geometry::{Point2, Vector2};
+use na::{Point2, Vector2};
 
 #[derive(Debug)]
 pub struct View {
@@ -11,8 +11,8 @@ impl View {
     pub fn new() -> Self {
         View {
             origin: Point2::new(0.0, 0.0),
-            width: 0,
-            height: 0,
+            width: 0.0,
+            height: 0.0,
         }
     }
 
@@ -21,7 +21,7 @@ impl View {
         self.height = h;
     }
 
-    pub fn trans(&self, v: Vector2) -> Self {
+    pub fn trans(&self, v: Vector2<f64>) -> Self {
         View {
             origin: self.origin + v,
             width: self.width,

@@ -23,14 +23,14 @@ impl OpeningState {
         }
     }
 
-    fn mask_alpha(&self) -> f32 {
+    fn mask_alpha(&self) -> u8 {
         let p = self.total / 4.0;
         if self.total - self.remaining < p {
-            (1.0 - (self.total - self.remaining) / p) as f32
+            ((1.0 - (self.total - self.remaining) / p) * 255.0) as u8
         } else if self.remaining < p {
-            (1.0 - self.remaining / p) as f32
+            ((1.0 - self.remaining / p) * 255.0) as u8
         } else {
-            0.0
+            0
         }
     }
 }
@@ -47,7 +47,7 @@ impl GameState for OpeningState {
     fn on_render(&mut self, ctx: &mut GameContext, r: &mut Renderer) {
         let x = (ctx.render_size[0] - self.logo_width) / 2;
         let y = (ctx.render_size[1] - self.logo_height) / 2;
-        let rect = Rect::new(x, y, self.logo_width, self.logo_height);
+        let rect = Rect::new(x as i32, y as i32, self.logo_width, self.logo_height);
         r.copy(ctx.res.logo_texture(), None, Some(rect)).unwrap();
         r.set_draw_color(Color::RGBA(0, 0, 0, self.mask_alpha()));
         r.fill_rect(Some(rect));
@@ -55,7 +55,7 @@ impl GameState for OpeningState {
 
     fn on_input(&mut self, ctx: &mut GameContext, dfa: &mut StateMachine) {
         for key in ctx.key_triggers.iter() {
-            if key == Keycode::Escape { // TODO: 使用自定义类型解耦？
+            if *key == Keycode::Escape { // TODO: 使用自定义类型解耦？
                 dfa.feed(StateTrans::Title);
                 break;
             }

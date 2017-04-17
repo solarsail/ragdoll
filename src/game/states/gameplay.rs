@@ -41,19 +41,19 @@ impl GameState for GamePlayState {
         let ds = ctx.scroll_rate as f64 * dt;
         match self.scroll[0] {
             Scroll::Left => {
-                self.map_view.trans_self(-ds, 0.0);
+                //self.map_view.trans_self(-ds, 0.0);
             }
             Scroll::Right => {
-                self.map_view.trans_self(ds, 0.0);
+                //self.map_view.trans_self(ds, 0.0);
             }
             _ => {}
         }
         match self.scroll[1] {
-            Scroll::Up=> {
-                self.map_view.trans_self(0.0, -ds);
+            Scroll::Up => {
+                //self.map_view.trans_self(0.0, -ds);
             }
-            Scroll::Down=> {
-                self.map_view.trans_self(0.0, ds);
+            Scroll::Down => {
+                //self.map_view.trans_self(0.0, ds);
             }
             _ => {}
         }
@@ -68,29 +68,29 @@ impl GameState for GamePlayState {
 
     fn on_input(&mut self, ctx: &mut GameContext, dfa: &mut StateMachine) {
         for key in ctx.key_triggers.iter() {
-            if key == Keycode::Escape {
+            if *key == Keycode::Escape {
                 dfa.feed(StateTrans::Pause);
             }
         }
 
-        if let Some(state) = ctx.key_states.get(Keycode::Left) {
+        if let Some(&state) = ctx.key_states.get(&Keycode::Left) {
             self.scroll[0] = if state { Scroll::Left } else { Scroll::None };
         }
-        if let Some(state) = ctx.key_states.get(Keycode::Right) {
+        if let Some(&state) = ctx.key_states.get(&Keycode::Right) {
             self.scroll[0] = if state { Scroll::Right } else { Scroll::None };
         }
-        if let Some(state) = ctx.key_states.get(Keycode::Up) {
+        if let Some(&state) = ctx.key_states.get(&Keycode::Up) {
             self.scroll[1] = if state { Scroll::Up } else { Scroll::None };
         }
-        if let Some(state) = ctx.key_states.get(Keycode::Down) {
+        if let Some(&state) = ctx.key_states.get(&Keycode::Down) {
             self.scroll[1] = if state { Scroll::Down } else { Scroll::None };
         }
-        if let Some(state) = ctx.mouse_state.get(MouseButton::Left) {
+        if let Some(&state) = ctx.mouse_states.get(&MouseButton::Left) {
             if state {
                 // TODO: use nalgebra to make translation
-                let cursor_world_coord = transform_pos(self.map_view.s2w_trans, ctx.cursor_screen_coord);
-                let hex = self.layout.coord_at(cursor_world_coord);
-                self.cursor_region.push(hex);
+                //let cursor_world_coord = transform_pos(self.map_view.s2w_trans, ctx.cursor_screen_coord);
+                //let hex = self.layout.coord_at(ctx.cursor_world_coord);
+                //self.cursor_region.push(hex);
             } else {
                 self.cursor_region.clear();
             }

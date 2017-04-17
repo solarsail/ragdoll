@@ -30,13 +30,14 @@ impl GameState for PauseState {
         r.set_draw_color(Color::RGBA(0, 0, 0, 102));
         r.fill_rect(None).unwrap();
         r.set_draw_color(Color::RGBA(255, 255, 255, 204));
-        r.fill_rect(Some(Rect::new(center_x - 100, center_y - 50, 200, 100))).unwrap();
-        r.copy(&mut texture, None, Some(Rect::new(center_x - texture.width / 2, center_y, texture.width, texture.height))).unwrap();
+        r.fill_rect(Some(Rect::new((center_x - 100) as i32, (center_y - 50) as i32, 200, 100))).unwrap();
+        r.copy(&mut texture, None, Some(Rect::new((center_x - surface.width() / 2) as i32,
+                                        (center_y - surface.height() / 2) as i32, surface.width(), surface.height()))).unwrap();
     }
 
     fn on_input(&mut self, ctx: &mut GameContext, dfa: &mut StateMachine) {
         for key in ctx.key_triggers.iter() {
-            if key == Keycode::Escape { // TODO: 使用自定义类型解耦？
+            if *key == Keycode::Escape { // TODO: 使用自定义类型解耦？
                 dfa.feed(StateTrans::Resume);
                 break;
             }
