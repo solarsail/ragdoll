@@ -1,6 +1,7 @@
 #[macro_use]
 extern crate log;
-extern crate env_logger;
+extern crate log_panics;
+extern crate log4rs;
 extern crate sdl2;
 extern crate hexgrid;
 extern crate find_folder;
@@ -19,7 +20,10 @@ use game::Game;
 
 
 fn main() {
-    let settings = Settings::load("settings.ini");
+    log4rs::init_file("config/log4rs.yaml", Default::default()).unwrap();
+    log_panics::init();
+
+    let settings = Settings::load("config/settings.ini");
     
     Game::start("random title", settings, |game| {
         game.run();
