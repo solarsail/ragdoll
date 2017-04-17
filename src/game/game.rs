@@ -47,11 +47,13 @@ impl<'a, 'b> Game<'a, 'b> {
     pub fn start<F>(window_title: &str, settings: Settings, mut worker: F)
         where F: FnMut(&mut Game) -> () {
 
+        info!("Initializing...");
         let sdl_context = sdl2::init().unwrap();
         let video_subsystem = sdl_context.video().unwrap();
         let window = video_subsystem
             .window(window_title, 800, 600)
             .position_centered()
+            .resizable()
             .opengl()
             .build()
             .unwrap();
@@ -78,6 +80,8 @@ impl<'a, 'b> Game<'a, 'b> {
 
         let mut game = Game::new(settings, window_title,
             &ttf_context, &mut renderer, &mut event_pump, &mut dfa, &mut states);
+
+        info!("Game started.");
         worker(&mut game);
     }
 
