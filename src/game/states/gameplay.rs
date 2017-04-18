@@ -70,6 +70,7 @@ impl GameState for GamePlayState {
         for key in ctx.key_triggers.iter() {
             if *key == Keycode::Escape {
                 dfa.feed(StateTrans::Pause);
+                info!("Paused.");
             }
         }
 

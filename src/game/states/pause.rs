@@ -39,6 +39,7 @@ impl GameState for PauseState {
         for key in ctx.key_triggers.iter() {
             if *key == Keycode::Escape { // TODO: 使用自定义类型解耦？
                 dfa.feed(StateTrans::Resume);
+                info!("Resumed.");
                 break;
             }
         }

@@ -2,6 +2,7 @@ use std::{thread, time};
 use std::collections::HashMap;
 
 use sdl2;
+use sdl2::hint;
 use sdl2::{Sdl, EventPump};
 use sdl2::ttf::Sdl2TtfContext;
 use sdl2::render::{Renderer, BlendMode};
@@ -44,12 +45,13 @@ pub struct Game<'a, 'b: 'a> {
 }
 
 impl<'a, 'b> Game<'a, 'b> {
-    pub fn start<F>(window_title: &str, settings: Settings, mut worker: F)
-        where F: FnMut(&mut Game) -> () {
+    pub fn start<F>(window_title: &str, settings: Settings, worker: F)
+        where F: Fn(&mut Game) -> () {
 
         info!("Initializing...");
         let sdl_context = sdl2::init().unwrap();
         let video_subsystem = sdl_context.video().unwrap();
+        hint::set("SDL_RENDER_SCALE_QUALITY", "2");
         let window = video_subsystem
             .window(window_title, 800, 600)
             .position_centered()
@@ -114,7 +116,6 @@ impl<'a, 'b> Game<'a, 'b> {
     fn process_events(&mut self) {
         let size = self.renderer.window().unwrap().size();
         self.context.render_size = [size.0, size.1];
-        //self.context.render_size = [800, 600];
         for event in self.event_pump.poll_iter() {
             match event {
                 Event::Quit { .. } => {
