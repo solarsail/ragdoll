@@ -10,6 +10,7 @@ use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
 use sdl2::mouse::MouseButton;
 use sdl2::pixels::Color;
+use sdl2::video::GLProfile;
 
 use na::{Point2, Vector2};
 
@@ -49,9 +50,15 @@ impl<'a, 'b> Game<'a, 'b> {
         where F: Fn(&mut Game) -> () {
 
         info!("Initializing...");
+        //hint::set("SDL_RENDER_SCALE_QUALITY", "2");
         let sdl_context = sdl2::init().unwrap();
         let video_subsystem = sdl_context.video().unwrap();
-        hint::set("SDL_RENDER_SCALE_QUALITY", "2");
+        let gl_attr = video_subsystem.gl_attr();
+        gl_attr.set_context_profile(GLProfile::Core);
+        gl_attr.set_context_version(3, 2);
+        // Enable anti-aliasing
+        gl_attr.set_multisample_buffers(1);
+        gl_attr.set_multisample_samples(4);
         let window = video_subsystem
             .window(window_title, 800, 600)
             .position_centered()
@@ -59,7 +66,7 @@ impl<'a, 'b> Game<'a, 'b> {
             .opengl()
             .build()
             .unwrap();
-        let mut renderer = window.renderer().build().unwrap();  // consumed window
+        let mut renderer = window.renderer().accelerated().build().unwrap();  // consumed window
         renderer.set_blend_mode(BlendMode::Blend);
         let mut event_pump = sdl_context.event_pump().unwrap();
         let ttf_context = sdl2::ttf::init().unwrap();
