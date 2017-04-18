@@ -29,6 +29,15 @@ impl View {
         }
     }
 
+    /*
+    pub fn project(&self, rect: R) -> R
+        where R: From<(i32, i32, u32, u32)> + Into<(i32, i32, u32, u32)> {
+
+        let r = rect.into::<(i32, i32, u32, u32)>();
+
+    }
+    */
+
     pub fn project(&self, p: Point2<f64>) -> Point2<f64> {
         // TODO
         Point2::new(0.0, 0.0)

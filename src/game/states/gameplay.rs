@@ -62,7 +62,7 @@ impl GameState for GamePlayState {
     #[allow(unused_variables)]
     fn on_render(&mut self, ctx: &mut GameContext, r: &mut Renderer) {
             // TODO: culling: use view or draw_state.scissor? how to use it?
-            //self.map.draw(&self.layout, &self.map_view, r);
+            self.map.draw(ctx, &self.layout, &self.map_view, r);
             //self.cursor_region.draw(&self.layout, &self.map_view, r);
     }
 
