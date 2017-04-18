@@ -6,6 +6,7 @@ use sdl2::render::Renderer;
 use hexgrid::Layout;
 use map::mapcell::MapCell;
 use view::View;
+use game::GameContext;
 
 
 pub struct HexMap {
@@ -34,9 +35,10 @@ impl HexMap {
         self.radius
     }
 
-    pub fn draw(&self, l: &Layout, v: &View, r: &mut Renderer) {
+    pub fn draw(&self, ctx: &mut GameContext, l: &Layout, v: &View, r: &mut Renderer) {
         for cell in self.content.iter().filter(|c| v.filter(l.bounding_box_of(c.coordinates()))) {
             // TODO
+            cell.draw(ctx, l, r);
         }
     }
 }
