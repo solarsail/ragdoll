@@ -17,8 +17,12 @@ impl MapCell {
 
     pub fn draw(&self, ctx: &mut GameContext, l: &Layout, r: &mut Renderer) {
         let rect = l.bounding_box_of(self.coord);
-        let dest_rect = Rect::new(rect[0] as i32, rect[1] as i32, rect[2] as u32, rect[3] as u32);
-        r.copy(ctx.res.hex_texture(), None, Some(dest_rect)).unwrap();
+        let dest_rect = Rect::new(rect[0] as i32,
+                                  rect[1] as i32,
+                                  rect[2] as u32,
+                                  rect[3] as u32);
+        r.copy(ctx.res.hex_texture(), None, Some(dest_rect))
+            .unwrap();
     }
 
     pub fn coordinates(&self) -> Coordinates {
