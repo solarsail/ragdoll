@@ -8,7 +8,7 @@ use ini::Ini;
 pub struct Settings {
     pub window_width: u32,
     pub window_height: u32,
-    pub scroll_rate: u32
+    pub scroll_rate: u32,
 }
 
 impl Settings {
@@ -16,7 +16,7 @@ impl Settings {
         Settings {
             window_width: 640,
             window_height: 480,
-            scroll_rate: 100
+            scroll_rate: 100,
         }
     }
 

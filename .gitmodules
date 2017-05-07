@@ -1,3 +1,6 @@
 [submodule "hexgrid"]
 	path = hexgrid
 	url = git@github.com:solarsail/hexgrid.git
+[submodule "rectgrid"]
+	path = rectgrid
+	url = git@github.com:solarsail/rectgrid.git

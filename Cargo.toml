@@ -8,7 +8,7 @@ log = "0.3"
 log4rs = "0.6"
 find_folder = "*"
 nalgebra = "0.11"
-hexgrid = { path = "hexgrid" }
+rectgrid = { path = "rectgrid" }
 
 [dependencies.sdl2]
 version = "0.29"

@@ -16,7 +16,7 @@ use na::{Point2, Vector2};
 
 use settings::*;
 use map::*;
-use hexgrid::{Layout, POINTY_TOP};
+use rectgrid::{Vertex, Layout, Position, Vector};
 use game::states::{OpeningState, GamePlayState, TitleState, PauseState};
 use game::{StateTrans, StateMachine, GameState};
 use resource::Resources;
@@ -47,7 +47,8 @@ pub struct Game<'a, 'b: 'a> {
 
 impl<'a, 'b> Game<'a, 'b> {
     pub fn start<F>(window_title: &str, settings: Settings, worker: F)
-        where F: Fn(&mut Game) -> () {
+        where F: Fn(&mut Game) -> ()
+    {
 
         info!("Initializing...");
         //hint::set("SDL_RENDER_SCALE_QUALITY", "2");
@@ -66,19 +67,23 @@ impl<'a, 'b> Game<'a, 'b> {
             .opengl()
             .build()
             .unwrap();
-        let mut renderer = window.renderer().accelerated().build().unwrap();  // consumed window
+        let mut renderer = window.renderer().accelerated().build().unwrap(); // consumed window
         renderer.set_blend_mode(BlendMode::Blend);
         let mut event_pump = sdl_context.event_pump().unwrap();
         let ttf_context = sdl2::ttf::init().unwrap();
 
+        // init state machine
         let mut states: Vec<Box<GameState>> = Vec::new();
         let mut dfa = StateMachine::new();
 
-        let opening = dfa.add_state(&mut states, Box::new(OpeningState::new(4.0, 200, 200)), false);
+        let opening = dfa.add_state(&mut states,
+                                    Box::new(OpeningState::new(4.0, 200, 200)),
+                                    false);
         let title = dfa.add_state(&mut states, Box::new(TitleState::new()), false);
         let pause = dfa.add_state(&mut states, Box::new(PauseState::new()), false);
-        let map = HexMap::new(5);
-        let layout = Layout::new(POINTY_TOP, [20.0, 20.0], [200.0, 200.0]);
+        let map = RectMap::test(5);
+
+        let layout = Layout::new(Vector::new(200, 200), Vertex::new(0, 0), 20, 20);
         let gameplay = dfa.add_state(&mut states, Box::new(GamePlayState::new(map, layout)), true);
 
         dfa.set_initial(opening);
@@ -87,8 +92,14 @@ impl<'a, 'b> Game<'a, 'b> {
         dfa.add_trans(gameplay, pause, StateTrans::Pause);
         dfa.add_trans(pause, gameplay, StateTrans::Resume);
 
-        let mut game = Game::new(settings, window_title,
-            &ttf_context, &mut renderer, &mut event_pump, &mut dfa, &mut states);
+        // create game
+        let mut game = Game::new(settings,
+                                 window_title,
+                                 &ttf_context,
+                                 &mut renderer,
+                                 &mut event_pump,
+                                 &mut dfa,
+                                 &mut states);
 
         info!("Game started.");
         worker(&mut game);
@@ -100,7 +111,8 @@ impl<'a, 'b> Game<'a, 'b> {
                renderer: &'a mut Renderer<'b>,
                event_pump: &'a mut EventPump,
                dfa: &'a mut StateMachine,
-               states: &'a mut Vec<Box<GameState>>) -> Self {
+               states: &'a mut Vec<Box<GameState>>)
+               -> Self {
         Game {
             context: GameContext {
                 render_size: [settings.window_width, settings.window_height],
@@ -203,9 +215,10 @@ impl<'a, 'b> Game<'a, 'b> {
             while time_since_last_update > time_per_frame {
                 time_since_last_update -= time_per_frame;
                 self.process_events();
-                self.update(time_per_frame.as_secs() as f64 + time_per_frame.subsec_nanos() as f64 / 1_000_000_000.0);
+                self.update(time_per_frame.as_secs() as f64 +
+                            time_per_frame.subsec_nanos() as f64 / 1_000_000_000.0);
             }
-            
+
             // 渲染
             self.render();
 
@@ -215,5 +228,4 @@ impl<'a, 'b> Game<'a, 'b> {
             }
         }
     }
-
 }

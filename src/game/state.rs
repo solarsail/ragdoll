@@ -13,7 +13,7 @@ pub trait GameState {
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 pub enum StateTrans {
-	Title,
+    Title,
     Gameplay,
     Pause,
     Resume,
@@ -30,7 +30,7 @@ pub struct StateMachine {
 }
 
 impl StateMachine {
-	pub fn new() -> StateMachine {
+    pub fn new() -> StateMachine {
         StateMachine {
             trans: Vec::new(),
             preserve: Vec::new(),
@@ -41,16 +41,20 @@ impl StateMachine {
         }
     }
 
-	pub fn add_state(&mut self, states: &mut Vec<Box<GameState>>, s: Box<GameState>, preserve: bool) -> usize {
-		states.push(s);
+    pub fn add_state(&mut self,
+                     states: &mut Vec<Box<GameState>>,
+                     s: Box<GameState>,
+                     preserve: bool)
+                     -> usize {
+        states.push(s);
         self.preserve.push(preserve);
-		self.trans.push(HashMap::new());
-		states.len() - 1
-	}
+        self.trans.push(HashMap::new());
+        states.len() - 1
+    }
 
-	pub fn add_trans(&mut self, from: usize, to: usize, action: StateTrans) {
-		self.trans[from].insert(action, to);
-	}
+    pub fn add_trans(&mut self, from: usize, to: usize, action: StateTrans) {
+        self.trans[from].insert(action, to);
+    }
 
     pub fn set_initial(&mut self, i: usize) {
         self.initial = i;
@@ -58,32 +62,31 @@ impl StateMachine {
         self.ui_stack.push(i);
     }
 
-	pub fn feed(&mut self, action: StateTrans) {
-		if let Some(&id) = self.trans[self.current].get(&action) {
+    pub fn feed(&mut self, action: StateTrans) {
+        if let Some(&id) = self.trans[self.current].get(&action) {
             if !self.preserve[self.current] {
                 self.ui_stack.pop();
             }
-			self.current = id;
+            self.current = id;
             self.ui_stack.push(id);
-			self.state_changed = true;
-		}
-	}
+            self.state_changed = true;
+        }
+    }
 
-	pub fn current_state_id(&self) -> usize {
-		self.current
-	}
+    pub fn current_state_id(&self) -> usize {
+        self.current
+    }
 
-	pub fn new_state(&mut self) -> Option<usize> {
-		if self.state_changed {
-			self.state_changed = false;
-			Some(self.current)
-		} else {
-			None
-		}
-	}
+    pub fn new_state(&mut self) -> Option<usize> {
+        if self.state_changed {
+            self.state_changed = false;
+            Some(self.current)
+        } else {
+            None
+        }
+    }
 
     pub fn ui_stack(&self) -> Vec<usize> {
         self.ui_stack.clone()
     }
 }
-

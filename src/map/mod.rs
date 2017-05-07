@@ -1,6 +1,6 @@
 mod region;
 mod mapcell;
-mod hexmap;
+mod rectmap;
 
 pub use self::region::{Region, Category};
-pub use self::hexmap::HexMap;
+pub use self::rectmap::RectMap;

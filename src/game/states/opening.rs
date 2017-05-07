@@ -55,7 +55,8 @@ impl GameState for OpeningState {
 
     fn on_input(&mut self, ctx: &mut GameContext, dfa: &mut StateMachine) {
         for key in ctx.key_triggers.iter() {
-            if *key == Keycode::Escape { // TODO: 使用自定义类型解耦？
+            if *key == Keycode::Escape {
+                // TODO: 使用自定义类型解耦？
                 dfa.feed(StateTrans::Title);
                 break;
             }

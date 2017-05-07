@@ -3,7 +3,7 @@ extern crate log;
 extern crate log_panics;
 extern crate log4rs;
 extern crate sdl2;
-extern crate hexgrid;
+extern crate rectgrid;
 extern crate find_folder;
 extern crate nalgebra as na;
 
@@ -24,8 +24,6 @@ fn main() {
     log_panics::init();
 
     let settings = Settings::load("config/settings.ini");
-    
-    Game::start("random title", settings, |game| {
-        game.run();
-    });
+
+    Game::start("random title", settings, |game| { game.run(); });
 }
