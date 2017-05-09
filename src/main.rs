@@ -6,24 +6,26 @@ extern crate sdl2;
 extern crate rectgrid;
 extern crate find_folder;
 extern crate nalgebra as na;
+extern crate specs;
 
 mod default;
-mod map;
+mod def;
+mod components;
+mod systems;
 mod game;
-mod view;
-mod settings;
+//mod settings;
 mod resource;
 
 
-use settings::*;
-use game::Game;
+//use settings::*;
+//use game::Game;
 
 
 fn main() {
     log4rs::init_file("config/log4rs.yaml", Default::default()).unwrap();
     log_panics::init();
 
-    let settings = Settings::load("config/settings.ini");
+    //let settings = Settings::load("config/settings.ini");
 
-    Game::start("random title", settings, |game| { game.run(); });
+    //Game::start("random title", settings, |game| { game.run(); });
 }

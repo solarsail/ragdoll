@@ -13,10 +13,10 @@ pub struct Map {
 }
 
 impl Map {
-    pub fn test(width: u32, height: u32) -> Map {
+    pub fn test(w: u32, h: u32) -> Map {
         Map {
             tiles: Vec::new(),
-            size: Size { width, height },
+            size: Size { w, h },
         }
     }
 }
