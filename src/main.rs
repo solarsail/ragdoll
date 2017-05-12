@@ -7,6 +7,7 @@ extern crate rectgrid;
 extern crate find_folder;
 extern crate nalgebra as na;
 extern crate specs;
+extern crate multiqueue;
 
 mod default;
 mod def;
