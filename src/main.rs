@@ -7,7 +7,8 @@ extern crate rectgrid;
 extern crate find_folder;
 extern crate nalgebra as na;
 extern crate specs;
-extern crate multiqueue;
+extern crate num_cpus;
+extern crate threadpool;
 
 mod default;
 mod def;
@@ -15,7 +16,7 @@ mod components;
 mod systems;
 mod game;
 //mod settings;
-mod resource;
+//mod resource;
 
 
 //use settings::*;

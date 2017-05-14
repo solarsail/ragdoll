@@ -1,8 +1,17 @@
+use std::sync::Arc;
+use std::ops::DerefMut;
+
+use threadpool::ThreadPool;
+use num_cpus;
+
 use sdl2;
 use sdl2::{Sdl, EventPump};
 use sdl2::ttf::Sdl2TtfContext;
 use sdl2::render::WindowCanvas;
 use sdl2::event::Event;
+use specs::{Component, Planner, Priority, System, World};
+
+use game::InputHandler;
 
 
 pub struct Game<'a> {
@@ -10,11 +19,12 @@ pub struct Game<'a> {
     canvas: &'a mut WindowCanvas,
     event_pump: &'a mut EventPump,
     // TODO: assets: AssetManager,
+    planner: Planner<()>,
     running: bool,
 }
 
 impl<'a> Game<'a> {
-    pub fn start(window_title: &str, window_width: i32, window_height: i32) {
+    pub fn start(window_title: &str, window_width: u32, window_height: u32) {
         let sdl_context = sdl2::init().unwrap();
         let video_subsystem = sdl_context.video().unwrap();
 
@@ -31,10 +41,19 @@ impl<'a> Game<'a> {
 
         let mut event_pump = sdl_context.event_pump().unwrap();
 
+        let pool = Arc::new(ThreadPool::new(num_cpus::get()));
+        let mut planner = Planner::from_pool(World::new(), pool);
+
+        let input_handler = InputHandler::new();
+        planner
+            .mut_world()
+            .add_resource::<InputHandler>(input_handler);
+
         let mut game = Game {
             ttf_ctx: &ttf_ctx,
             canvas: &mut canvas,
             event_pump: &mut event_pump,
+            planner: planner,
             running: false,
         };
 
@@ -42,8 +61,27 @@ impl<'a> Game<'a> {
     }
 
     fn run(&mut self) {
+        let input_handler = self.planner
+            .mut_world()
+            .write_resource::<InputHandler>()
+            .wait()
+            .deref_mut();
         while self.running {
-            for event in event_pump.poll_iter() {}
+            // Event handling
+            for event in self.event_pump.poll_iter() {
+                let processed = input_handler.update(&event);
+                if !processed {
+                    match event {
+                        Event::Quit { .. } => {
+                            self.running = false;
+                        }
+                        _ => {}
+                    }
+                }
+            }
+            // update
+            self.planner.dispatch(());
+            // render
         }
     }
 }

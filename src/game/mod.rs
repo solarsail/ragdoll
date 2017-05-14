@@ -1,1 +1,4 @@
-pub mod context;
+pub mod game;
+pub mod input;
+
+pub use self::input::InputHandler;

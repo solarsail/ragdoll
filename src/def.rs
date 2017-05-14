@@ -2,6 +2,7 @@ use std::convert::{From, Into};
 use na::Point2;
 
 
+#[derive(Debug)]
 pub struct Point {
     pub x: i32,
     pub y: i32,
@@ -22,6 +23,7 @@ impl From<Point2<i32>> for Point {
     }
 }
 
+#[derive(Debug)]
 pub struct Size {
     pub w: u32,
     pub h: u32,
