@@ -16,7 +16,7 @@ mod components;
 mod systems;
 mod game;
 //mod settings;
-//mod resource;
+mod resource;
 
 
 //use settings::*;
@@ -30,4 +30,5 @@ fn main() {
     //let settings = Settings::load("config/settings.ini");
 
     //Game::start("random title", settings, |game| { game.run(); });
+    game::Game::start("random title", 800, 600);
 }

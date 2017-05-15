@@ -29,9 +29,11 @@ impl InputHandler {
         match *e {
             Event::KeyDown { keycode: Some(c), .. } => {
                 self.keys_down.insert(c);
+                debug!("key down: {:?}", c);
             }
             Event::KeyUp { keycode: Some(c), .. } => {
                 self.keys_down.remove(&c);
+                debug!("key up: {:?}", c);
             }
             Event::MouseButtonDown {
                 mouse_btn: mb,
@@ -41,6 +43,7 @@ impl InputHandler {
             } => {
                 self.cursor_pos = [x, y];
                 self.mouse_down.insert(mb);
+                debug!("mouse down: {:?}", mb);
             }
             Event::MouseButtonUp {
                 mouse_btn: mb,
@@ -49,12 +52,15 @@ impl InputHandler {
                 ..
             } => {
                 self.cursor_pos = [x, y];
+                debug!("mouse up: {:?}", mb);
                 if self.mouse_down.remove(&mb) {
                     self.mouse_clicked.push_back(mb);
+                    debug!("mouse click: {:?}", mb);
                 }
             }
             Event::MouseMotion { x: x, y: y, .. } => {
                 self.cursor_pos = [x, y];
+                //debug!("mouse move: ({}, {})", x, y);
             }
             _ => {
                 processed = false;
@@ -64,8 +70,12 @@ impl InputHandler {
         processed
     }
 
-    pub fn is_pressed(&self, k: Keycode) -> bool {
+    pub fn key_down(&self, k: Keycode) -> bool {
         self.keys_down.contains(&k)
+    }
+
+    pub fn keys_down(&self, ks: &[Keycode]) -> bool {
+        ks.iter().all(|k| self.keys_down.contains(k))
     }
 
     pub fn clicked_iter(&mut self) -> ClickIter {

@@ -54,18 +54,18 @@ impl<'a> Game<'a> {
             canvas: &mut canvas,
             event_pump: &mut event_pump,
             planner: planner,
-            running: false,
+            running: true,
         };
 
         game.run();
     }
 
     fn run(&mut self) {
-        let input_handler = self.planner
+        let mut input_handler_lock = self.planner
             .mut_world()
             .write_resource::<InputHandler>()
-            .wait()
-            .deref_mut();
+            .wait();
+        let input_handler = input_handler_lock.deref_mut();
         while self.running {
             // Event handling
             for event in self.event_pump.poll_iter() {
