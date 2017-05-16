@@ -9,15 +9,13 @@ use def::Size;
 #[derive(Debug)]
 pub struct Renderable {
     tid: String,
-    pub alpha: u32,
     size: Size,
 }
 
 impl Renderable {
-    pub fn new<T: Into<String>>(tid: T, alpha: u32, w: u32, h: u32) -> Renderable {
+    pub fn new<T: Into<String>>(tid: T, w: u32, h: u32) -> Renderable {
         Renderable {
             tid: tid.into(),
-            alpha,
             size: Size { w, h },
         }
     }
