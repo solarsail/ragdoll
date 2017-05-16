@@ -1,6 +1,7 @@
 use specs::{World, Entity, Gate};
 
 use game::{InputHandler, State, Trans};
+use game::input::Click;
 use resource::AssetManager;
 use components::{Renderable, Position};
 
@@ -30,8 +31,8 @@ impl State for OpeningState {
 
     fn update(&mut self, world: &mut World, _assets: &mut AssetManager, _dt: f32) -> Trans {
         let mut input_handler = world.write_resource::<InputHandler>().pass();
-        for mouse_btn in input_handler.clicked_iter() {
-            debug!("mouse click: {:?}", mouse_btn);
+        for click in input_handler.clicked_iter() {
+            debug!("mouse click: {:?}", click);
         }
         Trans::None
     }

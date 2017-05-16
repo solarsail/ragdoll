@@ -6,10 +6,17 @@ pub use sdl2::keyboard::Keycode;
 pub use sdl2::mouse::MouseButton;
 
 
+#[derive(Debug)]
+pub struct Click {
+    pub btn: MouseButton,
+    pub x: i32,
+    pub y: i32,
+}
+
 pub struct InputHandler {
     keys_down: HashSet<Keycode>,
     mouse_down: HashSet<MouseButton>,
-    mouse_clicked: VecDeque<MouseButton>,
+    mouse_clicked: VecDeque<Click>,
     cursor_pos: [i32; 2],
 }
 
@@ -43,7 +50,12 @@ impl InputHandler {
                 self.cursor_pos = [x, y];
                 debug!("mouse up: {:?}", mouse_btn);
                 if self.mouse_down.remove(&mouse_btn) {
-                    self.mouse_clicked.push_back(mouse_btn);
+                    self.mouse_clicked
+                        .push_back(Click {
+                                       btn: mouse_btn,
+                                       x,
+                                       y,
+                                   });
                     debug!("mouse click: {:?}", mouse_btn);
                 }
             }
@@ -70,16 +82,20 @@ impl InputHandler {
     pub fn clicked_iter(&mut self) -> ClickIter {
         ClickIter { q: &mut self.mouse_clicked }
     }
+
+    pub fn mouse_pos(&self) -> &[i32; 2] {
+        &self.cursor_pos
+    }
 }
 
 
 pub struct ClickIter<'a> {
-    q: &'a mut VecDeque<MouseButton>,
+    q: &'a mut VecDeque<Click>,
 }
 
 impl<'a> Iterator for ClickIter<'a> {
-    type Item = MouseButton;
-    fn next(&mut self) -> Option<MouseButton> {
+    type Item = Click;
+    fn next(&mut self) -> Option<Click> {
         self.q.pop_front()
     }
 }
