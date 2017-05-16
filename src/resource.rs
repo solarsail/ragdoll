@@ -1,4 +1,4 @@
-use std::collections::hash_map::{HashMap, Entry};
+use std::collections::HashMap;
 use std::path::PathBuf;
 use std::marker::PhantomData;
 

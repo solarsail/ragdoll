@@ -1,6 +1,5 @@
 use std::collections::{HashSet, VecDeque};
 
-use sdl2::mouse::MouseState;
 use sdl2::event::Event;
 
 pub use sdl2::keyboard::Keycode;
@@ -35,30 +34,20 @@ impl InputHandler {
                 self.keys_down.remove(&c);
                 debug!("key up: {:?}", c);
             }
-            Event::MouseButtonDown {
-                mouse_btn: mb,
-                x: x,
-                y: y,
-                ..
-            } => {
+            Event::MouseButtonDown { mouse_btn, x, y, .. } => {
                 self.cursor_pos = [x, y];
-                self.mouse_down.insert(mb);
-                debug!("mouse down: {:?}", mb);
+                self.mouse_down.insert(mouse_btn);
+                debug!("mouse down: {:?}", mouse_btn);
             }
-            Event::MouseButtonUp {
-                mouse_btn: mb,
-                x: x,
-                y: y,
-                ..
-            } => {
+            Event::MouseButtonUp { mouse_btn, x, y, .. } => {
                 self.cursor_pos = [x, y];
-                debug!("mouse up: {:?}", mb);
-                if self.mouse_down.remove(&mb) {
-                    self.mouse_clicked.push_back(mb);
-                    debug!("mouse click: {:?}", mb);
+                debug!("mouse up: {:?}", mouse_btn);
+                if self.mouse_down.remove(&mouse_btn) {
+                    self.mouse_clicked.push_back(mouse_btn);
+                    debug!("mouse click: {:?}", mouse_btn);
                 }
             }
-            Event::MouseMotion { x: x, y: y, .. } => {
+            Event::MouseMotion { x, y, .. } => {
                 self.cursor_pos = [x, y];
                 //debug!("mouse move: ({}, {})", x, y);
             }

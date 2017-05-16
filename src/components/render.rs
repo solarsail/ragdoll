@@ -8,14 +8,16 @@ use def::Size;
 /// 尺寸单位为像素。
 #[derive(Debug)]
 pub struct Renderable {
-    tid: u32,
+    tid: String,
+    pub alpha: u32,
     size: Size,
 }
 
 impl Renderable {
-    pub fn new(tid: u32, w: u32, h: u32) -> Renderable {
+    pub fn new<T: Into<String>>(tid: T, alpha: u32, w: u32, h: u32) -> Renderable {
         Renderable {
-            tid,
+            tid: tid.into(),
+            alpha,
             size: Size { w, h },
         }
     }

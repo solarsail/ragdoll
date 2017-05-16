@@ -18,3 +18,5 @@ loggers:
     level: debug
     appenders:
       - file
+  ticketed_lock:
+    level: info
