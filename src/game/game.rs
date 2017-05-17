@@ -27,6 +27,9 @@ pub struct Game<'a> {
     assets: AssetManager<'a>,
     state_machine: StateMachine,
     planner: Planner<()>,
+    last_update: time::Instant,
+    accumulated_delta: time::Duration,
+    time_per_frame: time::Duration,
     running: bool,
 }
 
@@ -70,6 +73,9 @@ impl<'a> Game<'a> {
             assets,
             state_machine,
             planner: planner,
+            last_update: time::Instant::now(),
+            accumulated_delta: time::Duration::new(0, 0),
+            time_per_frame: time::Duration::new(0, 1_000_000_000u32 / FPS),
             running: true,
         };
 
@@ -77,16 +83,13 @@ impl<'a> Game<'a> {
     }
 
     fn run(&mut self) {
-        let time_per_frame = time::Duration::new(0, 1_000_000_000u32 / FPS);
-        let mut time_since_last_update = time::Duration::from_millis(0);
-        let mut mark = time::Instant::now();
         self.state_machine
             .start(self.planner.mut_world(), &mut self.assets);
 
         while self.running {
             let frame_start = time::Instant::now();
-            time_since_last_update += time::Instant::now() - mark;
-            mark = time::Instant::now();
+            self.accumulated_delta += time::Instant::now() - self.last_update;
+            self.last_update = time::Instant::now();
             // handle event
             self.handle_event();
             // update
@@ -96,8 +99,8 @@ impl<'a> Game<'a> {
 
 
             let frame_time = time::Instant::now() - frame_start;
-            if frame_time < time_per_frame {
-                thread::sleep(time_per_frame - frame_time);
+            if frame_time < self.time_per_frame {
+                thread::sleep(self.time_per_frame - frame_time);
             }
         }
     }
@@ -129,10 +132,10 @@ impl<'a> Game<'a> {
             self.state_machine
                 .update(self.planner.mut_world(),
                         &mut self.assets,
-                        time_per_frame.as_secs() as f32 +
-                        time_per_frame.subsec_nanos() as f32 / 1_000_000_000.0);
-            if time_since_last_update > time_per_frame {
-                time_since_last_update -= time_per_frame;
+                        self.time_per_frame.as_secs() as f32 +
+                        self.time_per_frame.subsec_nanos() as f32 / 1_000_000_000.0);
+            if self.accumulated_delta > self.time_per_frame {
+                self.accumulated_delta -= self.time_per_frame;
             } else {
                 break;
             }
