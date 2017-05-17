@@ -5,6 +5,5 @@ pub mod render;
 pub mod input;
 
 pub use self::input::InputHandler;
-pub use self::render::{RenderBuffer, RenderCommand};
 pub use self::game::Game;
 pub use self::state::{StateMachine, State, Trans};

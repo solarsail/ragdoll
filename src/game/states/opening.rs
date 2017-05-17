@@ -1,6 +1,7 @@
 use specs::{World, Entity, Gate};
 
-use game::{RenderBuffer, RenderCommand, InputHandler, State, Trans};
+use game::{InputHandler, State, Trans};
+use game::render::{RenderBuffer_1, RenderCommand};
 use game::input::Click;
 use resource::AssetManager;
 use components::{Renderable, Position};
@@ -32,15 +33,15 @@ impl State for OpeningState {
 
     fn update(&mut self, world: &mut World, _assets: &mut AssetManager, _dt: f32) -> Trans {
         let mut input_handler = world.write_resource::<InputHandler>().pass();
-        let mut render_buffer = world.write_resource::<RenderBuffer>().pass();
-        render_buffer
-            .object_layer
-            .push_back(RenderCommand {
-                           texture_id: "NOT_FOUND".into(),
-                           pos: Point::new(50, 50),
-                           size: Size::new(100, 100),
-                           alpha: 128,
-                       });
+        /*
+        let mut object_buffer = world.write_resource::<RenderBuffer_1>().pass();
+        object_buffer.push_back(RenderCommand {
+                                    texture_id: "NOT_FOUND".into(),
+                                    pos: Point::new(50, 50),
+                                    size: Size::new(100, 100),
+                                    alpha: 128,
+                                });
+        */
         for click in input_handler.clicked_iter() {
             debug!("mouse click: {:?}", click);
         }

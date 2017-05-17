@@ -13,9 +13,11 @@ use sdl2::event::Event;
 use specs::{Planner, World, Gate};
 
 use game::states;
-use game::{RenderBuffer, InputHandler, StateMachine};
+use game::{InputHandler, StateMachine};
+use game::render::{RenderBuffer_0, RenderBuffer_1};
 use resource::AssetManager;
 use components::{Renderable, Position};
+use systems::RenderSystem;
 
 
 const FPS: u32 = 60;
@@ -53,15 +55,20 @@ impl<'a> Game<'a> {
         let mut event_pump = sdl_context.event_pump().unwrap();
         // resources
         let input_handler = InputHandler::new();
-        let render_buffer = RenderBuffer::new();
+        let tile_buffer = RenderBuffer_0::new();
+        let object_buffer = RenderBuffer_1::new();
         let mut world = World::new();
         world.add_resource::<InputHandler>(input_handler);
-        world.add_resource::<RenderBuffer>(render_buffer);
+        world.add_resource::<RenderBuffer_0>(tile_buffer);
+        world.add_resource::<RenderBuffer_1>(object_buffer);
         world.register::<Renderable>();
         world.register::<Position>();
         // planner
         let pool = Arc::new(ThreadPool::new(num_cpus::get()));
         let mut planner = Planner::from_pool(world, pool);
+        // systems
+        let render_sys = RenderSystem;
+        planner.add_system(render_sys, "render", 0);
         // state machine
         let opening = states::OpeningState::new();
         let state_machine = StateMachine::new(opening);
@@ -144,20 +151,31 @@ impl<'a> Game<'a> {
     }
 
     fn render(&mut self) {
-        let mut render_buffer = self.planner
-            .mut_world()
-            .write_resource::<RenderBuffer>()
-            .pass();
         self.canvas.clear();
-        while let Some(c) = render_buffer.tile_layer.pop_front() {
-            let rect = Rect::new(c.pos.x, c.pos.y, c.size.w, c.size.h);
-            let texture = self.assets.texture(&c.texture_id);
-            self.canvas.copy(&texture, None, rect).unwrap();
+        {
+            let mut tile_buffer = self.planner
+                .mut_world()
+                .write_resource::<RenderBuffer_0>()
+                .pass();
+            while let Some(c) = tile_buffer.pop_front() {
+                let rect = Rect::new(c.pos.x, c.pos.y, c.size.w, c.size.h);
+                let texture = self.assets.texture(&c.texture_id);
+                //texture.borrow_mut().set_alpha_mod(c.alpha);
+                self.canvas.copy(&texture, None, rect).unwrap();
+            }
         }
-        while let Some(c) = render_buffer.object_layer.pop_front() {
-            let rect = Rect::new(c.pos.x, c.pos.y, c.size.w, c.size.h);
-            let texture = self.assets.texture(&c.texture_id);
-            self.canvas.copy(&texture, None, rect).unwrap();
+        {
+            let mut object_buffer = self.planner
+                .mut_world()
+                .write_resource::<RenderBuffer_1>()
+                .pass();
+            while let Some(c) = object_buffer.pop_front() {
+                let rect = Rect::new(c.pos.x, c.pos.y, c.size.w, c.size.h);
+                let texture = self.assets.texture(&c.texture_id);
+                //&mut texture.set_alpha_mod(c.alpha);
+                //texture.borrow_mut().set_alpha_mod(c.alpha);
+                self.canvas.copy(&texture, None, rect).unwrap();
+            }
         }
         self.canvas.present();
     }
