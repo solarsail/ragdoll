@@ -22,11 +22,11 @@ use systems::RenderSystem;
 
 const FPS: u32 = 60;
 
-pub struct Game<'a> {
+pub struct Game<'a, 'b: 'a> {
     ttf_ctx: &'a Sdl2TtfContext,
     canvas: &'a mut WindowCanvas,
     event_pump: &'a mut EventPump,
-    assets: AssetManager<'a>,
+    assets: AssetManager<'b>,
     state_machine: StateMachine,
     planner: Planner<()>,
     last_update: time::Instant,
@@ -35,7 +35,7 @@ pub struct Game<'a> {
     running: bool,
 }
 
-impl<'a> Game<'a> {
+impl<'a, 'b> Game<'a, 'b> {
     pub fn start(window_title: &str, window_width: u32, window_height: u32) {
         let sdl_context = sdl2::init().unwrap();
         let video_subsystem = sdl_context.video().unwrap();
@@ -70,7 +70,7 @@ impl<'a> Game<'a> {
         let render_sys = RenderSystem;
         planner.add_system(render_sys, "render", 0);
         // state machine
-        let opening = states::OpeningState::new();
+        let opening = states::OpeningState::new(4.0);
         let state_machine = StateMachine::new(opening);
 
         let mut game = Game {
@@ -160,8 +160,8 @@ impl<'a> Game<'a> {
             while let Some(c) = tile_buffer.pop_front() {
                 let rect = Rect::new(c.pos.x, c.pos.y, c.size.w, c.size.h);
                 let texture = self.assets.texture(&c.texture_id);
-                //texture.borrow_mut().set_alpha_mod(c.alpha);
-                //self.canvas.copy(&texture, None, rect).unwrap();
+                texture.borrow_mut().set_alpha_mod(c.alpha);
+                self.canvas.copy(&texture.borrow(), None, rect).unwrap();
             }
         }
         {
@@ -173,8 +173,8 @@ impl<'a> Game<'a> {
                 let rect = Rect::new(c.pos.x, c.pos.y, c.size.w, c.size.h);
                 let texture = self.assets.texture(&c.texture_id);
                 //&mut texture.set_alpha_mod(c.alpha);
-                //texture.borrow_mut().set_alpha_mod(c.alpha);
-                //self.canvas.copy(&texture, None, rect).unwrap();
+                texture.borrow_mut().set_alpha_mod(c.alpha);
+                self.canvas.copy(&texture.borrow(), None, rect).unwrap();
             }
         }
         self.canvas.present();

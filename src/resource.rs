@@ -5,7 +5,7 @@ use std::cell::RefCell;
 use std::borrow::Borrow;
 use std::hash::Hash;
 
-use sdl2::render::{Texture, TextureCreator, WindowCanvas};
+use sdl2::render::{BlendMode, Texture, TextureCreator, WindowCanvas};
 use sdl2::video::WindowContext;
 use sdl2::image::LoadTexture;
 use sdl2::pixels::PixelFormatEnum;
@@ -75,10 +75,12 @@ impl<'l, T> ResourceLoader<'l, Texture<'l>> for TextureCreator<T> {
                     }
                 })
                 .unwrap();
-
+            not_found.set_blend_mode(BlendMode::Blend);
             Ok(not_found)
         } else {
-            self.load_texture(path)
+            let mut texture = self.load_texture(path)?;
+            texture.set_blend_mode(BlendMode::Blend);
+            Ok(texture)
         }
 
     }
@@ -90,6 +92,7 @@ impl<'l> ResourceLoader<'l, Font<'l, 'static>> for Sdl2TtfContext {
     fn load(&'l self, details: &FontDetails) -> Result<Font<'l, 'static>, String> {
         println!("LOADED A FONT");
         self.load_font(&details.path, details.size)
+
     }
 }
 
