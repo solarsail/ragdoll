@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 use std::path::PathBuf;
 use std::rc::Rc;
+use std::cell::RefCell;
 use std::borrow::Borrow;
 use std::hash::Hash;
 
@@ -21,7 +22,7 @@ pub struct ResourceManager<'l, K, R, L>
           L: 'l + ResourceLoader<'l, R>
 {
     loader: &'l L,
-    cache: HashMap<K, Rc<R>>,
+    cache: HashMap<K, Rc<RefCell<R>>>,
 }
 
 impl<'l, K, R, L> ResourceManager<'l, K, R, L>
@@ -37,7 +38,7 @@ impl<'l, K, R, L> ResourceManager<'l, K, R, L>
 
     // Generics magic to allow a HashMap to use String as a key
     // while allowing it to use &str for gets
-    pub fn load<D>(&mut self, details: &D) -> Result<Rc<R>, String>
+    pub fn load<D>(&mut self, details: &D) -> Result<Rc<RefCell<R>>, String>
         where L: ResourceLoader<'l, R, Args = D>,
               D: Eq + Hash + ?Sized,
               K: Borrow<D> + for<'a> From<&'a D>
@@ -46,7 +47,7 @@ impl<'l, K, R, L> ResourceManager<'l, K, R, L>
             .get(details)
             .cloned()
             .map_or_else(|| {
-                             let resource = Rc::new(self.loader.load(details)?);
+                             let resource = Rc::new(RefCell::new(self.loader.load(details)?));
                              self.cache.insert(details.into(), resource.clone());
                              Ok(resource)
                          },
@@ -130,7 +131,7 @@ impl<'l> AssetManager<'l> {
         }
     }
 
-    pub fn texture(&mut self, id: &str) -> Rc<Texture<'l>> {
+    pub fn texture(&mut self, id: &str) -> Rc<RefCell<Texture<'l>>> {
         self.texture_manager
             .load(id)
             .unwrap_or(self.texture_manager.load("NOT_FOUND").unwrap())

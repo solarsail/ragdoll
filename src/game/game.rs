@@ -161,7 +161,7 @@ impl<'a> Game<'a> {
                 let rect = Rect::new(c.pos.x, c.pos.y, c.size.w, c.size.h);
                 let texture = self.assets.texture(&c.texture_id);
                 //texture.borrow_mut().set_alpha_mod(c.alpha);
-                self.canvas.copy(&texture, None, rect).unwrap();
+                //self.canvas.copy(&texture, None, rect).unwrap();
             }
         }
         {
@@ -174,7 +174,7 @@ impl<'a> Game<'a> {
                 let texture = self.assets.texture(&c.texture_id);
                 //&mut texture.set_alpha_mod(c.alpha);
                 //texture.borrow_mut().set_alpha_mod(c.alpha);
-                self.canvas.copy(&texture, None, rect).unwrap();
+                //self.canvas.copy(&texture, None, rect).unwrap();
             }
         }
         self.canvas.present();
