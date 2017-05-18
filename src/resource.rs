@@ -13,13 +13,13 @@ use sdl2::ttf::{Font, Sdl2TtfContext};
 use default;
 
 
-type TextureManager<'l, T> = ResourceManager<'l, String, Texture<'l>, TextureCreator<T>>;
+type TextureManager<'l, T> = ResourceManager<'l, PathBuf, Texture<'l>, TextureCreator<T>>;
 type FontManager<'l> = ResourceManager<'l, FontDetails, Font<'l, 'static>, Sdl2TtfContext>;
 
 /// 通用资源管理器，缓存从资源加载器中获取的资源。
 pub struct ResourceManager<'loader, K, R, L>
-    where K: Default,
-          L: 'loader + ResourceLoader<'loader, R>
+    where K: Invalid,
+          L: 'loader + ResourceLoader<'loader, R> + IdMapper<K>
 {
     loader: &'loader L,
     cache: HashMap<String, Rc<RefCell<R>>>,
@@ -27,13 +27,11 @@ pub struct ResourceManager<'loader, K, R, L>
 }
 
 impl<'loader, K, R, L> ResourceManager<'loader, K, R, L>
-    where K: Default,
-          L: ResourceLoader<'loader, R>
+    where K: Invalid,
+          L: ResourceLoader<'loader, R> + IdMapper<K>
 {
-    pub fn new<M>(loader: &'loader L, mapper: &M, mapping_file: PathBuf) -> Self
-        where M: IdMapper
-    {
-        let id_mapping = mapper.load_mapping(mapping_file);
+    pub fn new(loader: &'loader L, mapping_file: PathBuf) -> Self {
+        let id_mapping = loader.mapping(mapping_file);
         ResourceManager {
             loader: loader,
             cache: HashMap::new(),
@@ -42,20 +40,23 @@ impl<'loader, K, R, L> ResourceManager<'loader, K, R, L>
     }
 
     pub fn load<D>(&mut self, id: D) -> Result<Rc<RefCell<R>>, String>
-        where D: Into<String>
+        where D: Into<String>,
+              L: ResourceLoader<'loader, R, Args = K>
     {
+        let not_found = K::invalid();
+        let key = id.into();
         self.cache
-            .get(details)
+            .get(&key)
             .cloned()
             .map_or_else(|| {
                 let details = self.id_mapping
-                    .get(id.into())
+                    .get(&key)
                     .unwrap_or_else(|| {
-                                        warn!("Texture not found: {}", &id.into());
-                                        K::default()
+                                        warn!("Texture not found: {}", &key);
+                                        &not_found
                                     });
                 let resource = Rc::new(RefCell::new(self.loader.load(details)?));
-                self.cache.insert(id.into(), resource.clone());
+                self.cache.insert(key, resource.clone());
                 Ok(resource)
             },
                          Ok)
@@ -64,10 +65,10 @@ impl<'loader, K, R, L> ResourceManager<'loader, K, R, L>
 
 // TextureCreator knows how to load Textures
 impl<'l, T> ResourceLoader<'l, Texture<'l>> for TextureCreator<T> {
-    type Args = str;
-    fn load(&'l self, path: &str) -> Result<Texture, String> {
+    type Args = PathBuf;
+    fn load(&'l self, path: &PathBuf) -> Result<Texture, String> {
         //println!("LOADED A TEXTURE");
-        if path == String::default() {
+        if *path == PathBuf::invalid() {
             let mut not_found = self.create_texture_streaming(PixelFormatEnum::RGB24, 32, 32)
                 .unwrap();
             // Create a red-green gradient
@@ -92,6 +93,17 @@ impl<'l, T> ResourceLoader<'l, Texture<'l>> for TextureCreator<T> {
     }
 }
 
+impl<T> IdMapper<PathBuf> for TextureCreator<T> {
+    fn mapping(&self, mapping_file: PathBuf) -> HashMap<String, PathBuf> {
+        let mut m = HashMap::new();
+        // DEBUG
+        let image_path = default::assets_path().join("images");
+        m.insert("logo".into(), image_path.join("rust-logo.png"));
+        m
+    }
+}
+
+
 // Font Context knows how to load Fonts
 impl<'l> ResourceLoader<'l, Font<'l, 'static>> for Sdl2TtfContext {
     type Args = FontDetails;
@@ -102,16 +114,49 @@ impl<'l> ResourceLoader<'l, Font<'l, 'static>> for Sdl2TtfContext {
     }
 }
 
+impl IdMapper<FontDetails> for Sdl2TtfContext {
+    fn mapping(&self, mapping_file: PathBuf) -> HashMap<String, FontDetails> {
+        let mut m = HashMap::new();
+        // DEBUG
+        m
+    }
+}
+
+
+impl Invalid for PathBuf {
+    fn invalid() -> PathBuf {
+        default::assets_path().join("invalid")
+    }
+}
+
+impl Invalid for FontDetails {
+    fn invalid() -> FontDetails {
+        FontDetails {
+            path: PathBuf::invalid(),
+            size: 0,
+        }
+    }
+}
+
+
 // Generic trait to Load any Resource Kind
 pub trait ResourceLoader<'l, R> {
     type Args: ?Sized;
     fn load(&'l self, data: &Self::Args) -> Result<R, String>;
 }
 
+pub trait IdMapper<D> {
+    fn mapping(&self, mapping_file: PathBuf) -> HashMap<String, D>;
+}
+
+pub trait Invalid {
+    fn invalid() -> Self;
+}
+
 /// 加载字体所需的信息。
-#[derive(PartialEq, Eq, Hash, Deserialize)]
+#[derive(PartialEq, Eq, Hash)]
 pub struct FontDetails {
-    pub path: String,
+    pub path: PathBuf,
     pub size: u16,
 }
 
@@ -136,8 +181,8 @@ impl<'l> AssetManager<'l> {
                ttf_ctx: &'l Sdl2TtfContext)
                -> AssetManager<'l> {
         AssetManager {
-            texture_manager: TextureManager::new(texture_creator),
-            font_manager: FontManager::new(ttf_ctx),
+            texture_manager: TextureManager::new(texture_creator, "fake_path".into()),
+            font_manager: FontManager::new(ttf_ctx, "fake_path".into()),
         }
     }
 
@@ -149,63 +194,6 @@ impl<'l> AssetManager<'l> {
 
 /*
 
-impl<'r> TextureLoader<'r> {
-    fn new(creator: TextureCreator<WindowContext>, conf_file: &str) -> TextureLoader {
-        let mut conf = HashMap::new();
-        // TODO: load conf file
-        // debug
-        let image_path = default::assets_path()
-            .join("images")
-            .join("rust-logo.png");
-        let rect_path = default::assets_path().join("images").join("rect.png");
-        conf.insert("logo".into(), image_path);
-        conf.insert("tile".into(), rect_path);
-        // debug end
-        TextureLoader {
-            creator,
-            conf,
-            _marker: PhantomData,
-        }
-    }
-
-    fn load<T: Into<String>>(&'r self, id: T) -> Option<Texture> {
-        self.creator
-            .load_texture(self.conf.get(&id.into()).unwrap())
-            .map_err(|e| {
-                         warn!("unable to load texture: {}", e);
-                         e
-                     })
-            .ok()
-    }
-
-    fn not_found(&'r self) -> Texture {
-        let mut not_found = self.creator
-            .create_texture_streaming(PixelFormatEnum::RGB24, 32, 32)
-            .unwrap();
-        // Create a red-green gradient
-        not_found
-            .with_lock(None, |buffer: &mut [u8], pitch: usize| for y in 0..32 {
-                for x in 0..32 {
-                    let offset = y * pitch + x * 3;
-                    buffer[offset] = x as u8;
-                    buffer[offset + 1] = y as u8;
-                    buffer[offset + 2] = 0;
-                }
-            })
-            .unwrap();
-
-        not_found
-    }
-}
-
-
-pub struct AssetManager<'ttf, 'r> {
-    // TODO: FontLoader
-    title_font: Font<'ttf, 'static>,
-    caption_font: Font<'ttf, 'static>,
-    textures: HashMap<String, Texture<'r>>,
-    loader: TextureLoader<'r>,
-}
 
 impl<'ttf, 'r> AssetManager<'ttf, 'r> {
     pub fn new(ttf_ctx: &'ttf Sdl2TtfContext, canvas: &WindowCanvas) -> AssetManager<'ttf, 'r> {
