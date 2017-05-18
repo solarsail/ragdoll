@@ -16,41 +16,48 @@ use default;
 type TextureManager<'l, T> = ResourceManager<'l, String, Texture<'l>, TextureCreator<T>>;
 type FontManager<'l> = ResourceManager<'l, FontDetails, Font<'l, 'static>, Sdl2TtfContext>;
 
-// Generic struct to cache any resource loaded by a ResourceLoader
-pub struct ResourceManager<'l, K, R, L>
-    where K: Hash + Eq,
-          L: 'l + ResourceLoader<'l, R>
+/// 通用资源管理器，缓存从资源加载器中获取的资源。
+pub struct ResourceManager<'loader, K, R, L>
+    where K: Default,
+          L: 'loader + ResourceLoader<'loader, R>
 {
-    loader: &'l L,
-    cache: HashMap<K, Rc<RefCell<R>>>,
+    loader: &'loader L,
+    cache: HashMap<String, Rc<RefCell<R>>>,
+    id_mapping: HashMap<String, K>,
 }
 
-impl<'l, K, R, L> ResourceManager<'l, K, R, L>
-    where K: Hash + Eq,
-          L: ResourceLoader<'l, R>
+impl<'loader, K, R, L> ResourceManager<'loader, K, R, L>
+    where K: Default,
+          L: ResourceLoader<'loader, R>
 {
-    pub fn new(loader: &'l L) -> Self {
+    pub fn new<M>(loader: &'loader L, mapper: &M, mapping_file: PathBuf) -> Self
+        where M: IdMapper
+    {
+        let id_mapping = mapper.load_mapping(mapping_file);
         ResourceManager {
-            cache: HashMap::new(),
             loader: loader,
+            cache: HashMap::new(),
+            id_mapping,
         }
     }
 
-    // Generics magic to allow a HashMap to use String as a key
-    // while allowing it to use &str for gets
-    pub fn load<D>(&mut self, details: &D) -> Result<Rc<RefCell<R>>, String>
-        where L: ResourceLoader<'l, R, Args = D>,
-              D: Eq + Hash + ?Sized,
-              K: Borrow<D> + for<'a> From<&'a D>
+    pub fn load<D>(&mut self, id: D) -> Result<Rc<RefCell<R>>, String>
+        where D: Into<String>
     {
         self.cache
             .get(details)
             .cloned()
             .map_or_else(|| {
-                             let resource = Rc::new(RefCell::new(self.loader.load(details)?));
-                             self.cache.insert(details.into(), resource.clone());
-                             Ok(resource)
-                         },
+                let details = self.id_mapping
+                    .get(id.into())
+                    .unwrap_or_else(|| {
+                                        warn!("Texture not found: {}", &id.into());
+                                        K::default()
+                                    });
+                let resource = Rc::new(RefCell::new(self.loader.load(details)?));
+                self.cache.insert(id.into(), resource.clone());
+                Ok(resource)
+            },
                          Ok)
     }
 }
@@ -60,8 +67,7 @@ impl<'l, T> ResourceLoader<'l, Texture<'l>> for TextureCreator<T> {
     type Args = str;
     fn load(&'l self, path: &str) -> Result<Texture, String> {
         //println!("LOADED A TEXTURE");
-        if path == "NOT_FOUND" {
-            warn!("texture not found");
+        if path == String::default() {
             let mut not_found = self.create_texture_streaming(PixelFormatEnum::RGB24, 32, 32)
                 .unwrap();
             // Create a red-green gradient
@@ -102,8 +108,8 @@ pub trait ResourceLoader<'l, R> {
     fn load(&'l self, data: &Self::Args) -> Result<R, String>;
 }
 
-// Information needed to load a Font
-#[derive(PartialEq, Eq, Hash)]
+/// 加载字体所需的信息。
+#[derive(PartialEq, Eq, Hash, Deserialize)]
 pub struct FontDetails {
     pub path: String,
     pub size: u16,
@@ -119,6 +125,7 @@ impl<'a> From<&'a FontDetails> for FontDetails {
 }
 
 
+/// 资源管理器，包括纹理和字体管理，以及资源文件与id的对应关系。
 pub struct AssetManager<'l> {
     texture_manager: TextureManager<'l, WindowContext>,
     font_manager: FontManager<'l>,
@@ -135,19 +142,12 @@ impl<'l> AssetManager<'l> {
     }
 
     pub fn texture(&mut self, id: &str) -> Rc<RefCell<Texture<'l>>> {
-        self.texture_manager
-            .load(id)
-            .unwrap_or(self.texture_manager.load("NOT_FOUND").unwrap())
+        self.texture_manager.load(id).unwrap()
     }
 }
 
 
 /*
-struct TextureLoader<'r> {
-    creator: TextureCreator<WindowContext>,
-    conf: HashMap<String, PathBuf>,
-    _marker: PhantomData<&'r ()>,
-}
 
 impl<'r> TextureLoader<'r> {
     fn new(creator: TextureCreator<WindowContext>, conf_file: &str) -> TextureLoader {
