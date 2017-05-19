@@ -22,8 +22,7 @@ use systems::RenderSystem;
 
 const FPS: u32 = 60;
 
-pub struct Game<'a, 'b: 'a> {
-    ttf_ctx: &'a Sdl2TtfContext,
+pub struct Game<'a, 'b> {
     canvas: &'a mut WindowCanvas,
     event_pump: &'a mut EventPump,
     assets: AssetManager<'b>,
@@ -74,7 +73,6 @@ impl<'a, 'b> Game<'a, 'b> {
         let state_machine = StateMachine::new(opening);
 
         let mut game = Game {
-            ttf_ctx: &ttf_ctx,
             canvas: &mut canvas,
             event_pump: &mut event_pump,
             assets,

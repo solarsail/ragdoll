@@ -37,7 +37,7 @@ impl OpeningState {
 
 impl State for OpeningState {
     fn on_start(&mut self, world: &mut World, _assets: &mut AssetManager) {
-        let logo = Renderable::new("logo", 100, 100);
+        let logo = Renderable::new("logo1", 100, 100);
         self.logo = Some(world
                              .create_now()
                              .with(logo)

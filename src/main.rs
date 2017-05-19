@@ -9,6 +9,10 @@ extern crate nalgebra as na;
 extern crate specs;
 extern crate num_cpus;
 extern crate threadpool;
+#[macro_use]
+extern crate serde_derive;
+extern crate serde_yaml;
+
 
 mod default;
 mod def;
