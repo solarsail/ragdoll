@@ -7,16 +7,15 @@ use num_cpus;
 use sdl2;
 use sdl2::rect::Rect;
 use sdl2::EventPump;
-use sdl2::ttf::Sdl2TtfContext;
 use sdl2::render::WindowCanvas;
 use sdl2::event::Event;
 use specs::{Planner, World, Gate};
 
 use game::states;
 use game::{InputHandler, StateMachine};
-use game::render::{RenderBuffer_0, RenderBuffer_1};
+use game::render::{RenderBuffer0, RenderBuffer1, RenderCommand};
 use resource::AssetManager;
-use components::{Renderable, Position};
+use components::{Renderable, Position, Text};
 use systems::RenderSystem;
 
 
@@ -54,13 +53,14 @@ impl<'a, 'b> Game<'a, 'b> {
         let mut event_pump = sdl_context.event_pump().unwrap();
         // resources
         let input_handler = InputHandler::new();
-        let tile_buffer = RenderBuffer_0::new();
-        let object_buffer = RenderBuffer_1::new();
+        let tile_buffer = RenderBuffer0::new();
+        let object_buffer = RenderBuffer1::new();
         let mut world = World::new();
         world.add_resource::<InputHandler>(input_handler);
-        world.add_resource::<RenderBuffer_0>(tile_buffer);
-        world.add_resource::<RenderBuffer_1>(object_buffer);
+        world.add_resource::<RenderBuffer0>(tile_buffer);
+        world.add_resource::<RenderBuffer1>(object_buffer);
         world.register::<Renderable>();
+        world.register::<Text>();
         world.register::<Position>();
         // planner
         let pool = Arc::new(ThreadPool::new(num_cpus::get()));
@@ -148,31 +148,58 @@ impl<'a, 'b> Game<'a, 'b> {
         self.planner.dispatch(());
     }
 
+    fn _render(&mut self, cmd: RenderCommand) {
+        match cmd {
+            RenderCommand::Texture {
+                texture_id,
+                pos,
+                size,
+                alpha,
+            } => {
+                let texture = self.assets.texture(&texture_id);
+                let rect = if let Some(s) = size {
+                    Rect::new(pos.x, pos.y, s.w, s.h)
+                } else {
+                    let q = texture.borrow().query();
+                    Rect::new(pos.x, pos.y, q.width, q.height)
+                };
+                if let Some(a) = alpha {
+                    texture.borrow_mut().set_alpha_mod(a);
+                }
+                self.canvas.copy(&texture.borrow(), None, rect).unwrap();
+            }
+            RenderCommand::Text {
+                font_id,
+                content,
+                pos,
+                width,
+                color,
+            } => {
+                let texture = self.assets.text(&font_id, &content, width, color);
+                let q = texture.borrow().query();
+                let rect = Rect::new(pos.x, pos.y, q.width, q.height);
+                self.canvas.copy(&texture.borrow(), None, rect).unwrap();
+            }
+        }
+    }
     fn render(&mut self) {
         self.canvas.clear();
         {
             let mut tile_buffer = self.planner
                 .mut_world()
-                .write_resource::<RenderBuffer_0>()
+                .write_resource::<RenderBuffer0>()
                 .pass();
             while let Some(c) = tile_buffer.pop_front() {
-                let rect = Rect::new(c.pos.x, c.pos.y, c.size.w, c.size.h);
-                let texture = self.assets.texture(&c.texture_id);
-                texture.borrow_mut().set_alpha_mod(c.alpha);
-                self.canvas.copy(&texture.borrow(), None, rect).unwrap();
+                self._render(c);
             }
         }
         {
             let mut object_buffer = self.planner
                 .mut_world()
-                .write_resource::<RenderBuffer_1>()
+                .write_resource::<RenderBuffer1>()
                 .pass();
             while let Some(c) = object_buffer.pop_front() {
-                let rect = Rect::new(c.pos.x, c.pos.y, c.size.w, c.size.h);
-                let texture = self.assets.texture(&c.texture_id);
-                //&mut texture.set_alpha_mod(c.alpha);
-                texture.borrow_mut().set_alpha_mod(c.alpha);
-                self.canvas.copy(&texture.borrow(), None, rect).unwrap();
+                self._render(c);
             }
         }
         self.canvas.present();

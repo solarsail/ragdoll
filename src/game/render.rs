@@ -1,15 +1,24 @@
 use std::collections::VecDeque;
-use std::cell::RefCell;
 
+use sdl2::pixels::Color;
 use def::{Point, Size};
 
 
-pub struct RenderCommand {
-    pub texture_id: String,
-    pub pos: Point,
-    pub size: Size,
-    pub alpha: u8,
+pub enum RenderCommand {
+    Texture {
+        texture_id: String,
+        pos: Point,
+        size: Option<Size>,
+        alpha: Option<u8>,
+    },
+    Text {
+        font_id: String,
+        content: String,
+        width: u32,
+        color: Color,
+        pos: Point,
+    },
 }
 
-pub type RenderBuffer_0 = VecDeque<RenderCommand>;
-pub type RenderBuffer_1 = VecDeque<RenderCommand>;
+pub type RenderBuffer0 = VecDeque<RenderCommand>;
+pub type RenderBuffer1 = VecDeque<RenderCommand>;

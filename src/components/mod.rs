@@ -5,4 +5,4 @@ pub mod physics;
 pub mod render;
 
 pub use self::geometry::Position;
-pub use self::render::Renderable;
+pub use self::render::{Renderable, Text};

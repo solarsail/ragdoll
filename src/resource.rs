@@ -2,12 +2,9 @@ use std::collections::HashMap;
 use std::path::PathBuf;
 use std::rc::Rc;
 use std::cell::RefCell;
-use std::borrow::Borrow;
-use std::hash::Hash;
 use std::fs::File;
-use std::io::prelude::*;
 
-use sdl2::render::{BlendMode, Texture, TextureCreator, WindowCanvas};
+use sdl2::render::{BlendMode, Texture, TextureCreator};
 use sdl2::video::WindowContext;
 use sdl2::image::LoadTexture;
 use sdl2::pixels::{PixelFormatEnum, Color};
@@ -94,9 +91,7 @@ impl<T> IdMapper<PathBuf> for TextureCreator<T> {
 impl<'l> ResourceLoader<'l, Font<'l, 'static>> for Sdl2TtfContext {
     type Args = FontDetails;
     fn load(&'l self, details: &FontDetails) -> Result<Font<'l, 'static>, String> {
-        println!("LOADED A FONT");
         self.load_font(&details.path, details.size)
-
     }
 }
 
@@ -182,15 +177,20 @@ impl<'l> AssetManager<'l> {
             .unwrap_or(self.texture_not_found.clone())
     }
 
-    pub fn font(&mut self, id: &str, text: &str, color: Color) -> Rc<RefCell<Texture<'l>>> {
-        let font_texture_id = format!("font_{}", id);
+    pub fn text(&mut self,
+                id: &str,
+                text: &str,
+                width: u32,
+                color: Color)
+                -> Rc<RefCell<Texture<'l>>> {
+        let font_texture_id = format!("font_{}_{}", id, text);
         if let Ok(t) = self.texture_manager.load(&font_texture_id) {
             t
         } else if let Ok(f) = self.font_manager.load(id) {
             let surface = f.as_ref()
                 .borrow()
                 .render(text)
-                .blended(color)
+                .blended_wrapped(color, width)
                 .unwrap();
             let texture = self.texture_manager
                 .loader
@@ -201,42 +201,5 @@ impl<'l> AssetManager<'l> {
         } else {
             self.texture_not_found.clone()
         }
-
     }
 }
-
-
-/*
-
-
-impl<'ttf, 'r> AssetManager<'ttf, 'r> {
-    pub fn new(ttf_ctx: &'ttf Sdl2TtfContext, canvas: &WindowCanvas) -> AssetManager<'ttf, 'r> {
-        let font_path = default::assets_path()
-            .join("fonts")
-            .join("RussoOne-Regular.ttf");
-
-        let texture_creator = canvas.texture_creator();
-        AssetManager {
-            title_font: ttf_ctx.load_font(&font_path, 30).unwrap(),
-            caption_font: ttf_ctx.load_font(&font_path, 22).unwrap(),
-            textures: HashMap::new(),
-            loader: TextureLoader::new(texture_creator, "fake_conf"),
-        }
-    }
-
-    pub fn title_font(&self) -> &Font {
-        &self.title_font
-    }
-
-    pub fn caption_font(&self) -> &Font {
-        &self.caption_font
-    }
-
-    pub fn texture<T: Into<String>>(&'r mut self, id: T) -> &Texture {
-        let id = id.into();
-        self.textures
-            .entry(id.clone())
-            .or_insert(self.loader.load(id).unwrap_or(self.loader.not_found()))
-    }
-}
-*/
