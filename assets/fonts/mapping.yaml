@@ -5,3 +5,6 @@ title:
 content:
   path: CrimsonText-Regular.ttf
   size: 20
+debug:
+  path: SourceCodePro-Regular.ttf
+  size: 18

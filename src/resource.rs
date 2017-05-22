@@ -202,4 +202,25 @@ impl<'l> AssetManager<'l> {
             self.texture_not_found.clone()
         }
     }
+
+    pub fn text_uncached(&mut self,
+                         font_id: &str,
+                         text: &str,
+                         color: Color)
+                         -> Rc<RefCell<Texture<'l>>> {
+        if let Ok(f) = self.font_manager.load(font_id) {
+            let surface = f.as_ref()
+                .borrow()
+                .render(text)
+                .blended(color)
+                .unwrap();
+            let texture = self.texture_manager
+                .loader
+                .create_texture_from_surface(&surface)
+                .unwrap();
+            Rc::new(RefCell::new(texture)).clone()
+        } else {
+            self.texture_not_found.clone()
+        }
+    }
 }

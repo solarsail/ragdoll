@@ -1,5 +1,6 @@
 use std::sync::Arc;
 use std::{thread, time};
+use std::env;
 
 use threadpool::ThreadPool;
 use num_cpus;
@@ -9,6 +10,7 @@ use sdl2::rect::Rect;
 use sdl2::EventPump;
 use sdl2::render::WindowCanvas;
 use sdl2::event::Event;
+use sdl2::pixels::Color;
 use specs::{Planner, World, Gate};
 
 use game::states;
@@ -27,9 +29,11 @@ pub struct Game<'a, 'b> {
     assets: AssetManager<'b>,
     state_machine: StateMachine,
     planner: Planner<()>,
+    start_instant: time::Instant,
     last_update: time::Instant,
     accumulated_delta: time::Duration,
     time_per_frame: time::Duration,
+    frame_counter: u32, // 在每秒100帧的情况下，连续运行约500天将溢出
     running: bool,
 }
 
@@ -78,9 +82,11 @@ impl<'a, 'b> Game<'a, 'b> {
             assets,
             state_machine,
             planner: planner,
+            start_instant: time::Instant::now(),
             last_update: time::Instant::now(),
             accumulated_delta: time::Duration::new(0, 0),
             time_per_frame: time::Duration::new(0, 1_000_000_000u32 / FPS),
+            frame_counter: 0,
             running: true,
         };
 
@@ -92,8 +98,10 @@ impl<'a, 'b> Game<'a, 'b> {
             .start(self.planner.mut_world(), &mut self.assets);
 
         while self.running {
+            self.frame_counter += 1;
+
             let frame_start = time::Instant::now();
-            self.accumulated_delta += time::Instant::now() - self.last_update;
+            self.accumulated_delta += self.last_update.elapsed();
             self.last_update = time::Instant::now();
             // handle event
             self.handle_event();
@@ -102,8 +110,7 @@ impl<'a, 'b> Game<'a, 'b> {
             // render
             self.render();
 
-
-            let frame_time = time::Instant::now() - frame_start;
+            let frame_time = frame_start.elapsed();
             if frame_time < self.time_per_frame {
                 thread::sleep(self.time_per_frame - frame_time);
             }
@@ -202,6 +209,23 @@ impl<'a, 'b> Game<'a, 'b> {
                 self._render(c);
             }
         }
+        // FPS counter. TODO: add a switch
+        if env::var("SHOW_FPS").is_ok() {
+            self._draw_fps();
+        }
+
         self.canvas.present();
+    }
+
+    fn _draw_fps(&mut self) {
+        let elapsed = self.start_instant.elapsed();
+        let sec = elapsed.as_secs() as f32 + elapsed.subsec_nanos() as f32 / 1_000_000_000.0;
+        let fps = self.assets
+            .text_uncached("debug",
+                           &format!("FPS: {:.2}", self.frame_counter as f32 / sec),
+                           Color::RGB(255, 0, 0));
+        let q = fps.borrow().query();
+        let rect = Rect::new(10, 10, q.width, q.height);
+        self.canvas.copy(&fps.borrow(), None, rect).unwrap();
     }
 }
