@@ -2,6 +2,7 @@ use specs::{World, Entity, Gate, Join};
 use sdl2::pixels::Color;
 
 use game::{InputHandler, State, Trans};
+use game::render::ScreenDimension;
 use resource::AssetManager;
 use components::{Renderable, Position, Text};
 
@@ -37,16 +38,15 @@ impl OpeningState {
 
 impl State for OpeningState {
     fn on_start(&mut self, world: &mut World, _assets: &mut AssetManager) {
-        let logo = Renderable::new("logo", 100, 100);
+        let screen_dim = world.read_resource::<ScreenDimension>().pass();
+        let p = Position::new2((screen_dim.w - 200) as i32 / 2,
+                               (screen_dim.h - 200) as i32 / 2);
+        let logo = Renderable::new("logo", 200, 200);
         let text = Text::new("content",
                              "this is a test 测试",
                              Color::RGBA(200, 200, 200, 200),
                              100);
-        self.logo = Some(world
-                             .create_now()
-                             .with(logo)
-                             .with(Position::new2(50, 50))
-                             .build());
+        self.logo = Some(world.create_now().with(logo).with(p).build());
         self.text = Some(world
                              .create_now()
                              .with(text)

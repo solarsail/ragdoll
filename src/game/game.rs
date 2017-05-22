@@ -15,7 +15,7 @@ use specs::{Planner, World, Gate};
 
 use game::states;
 use game::{InputHandler, StateMachine};
-use game::render::{RenderBuffer0, RenderBuffer1, RenderCommand};
+use game::render::{RenderBuffer0, RenderBuffer1, RenderCommand, ScreenDimension};
 use resource::AssetManager;
 use components::{Renderable, Position, Text};
 use systems::RenderSystem;
@@ -59,10 +59,12 @@ impl<'a, 'b> Game<'a, 'b> {
         let input_handler = InputHandler::new();
         let tile_buffer = RenderBuffer0::new();
         let object_buffer = RenderBuffer1::new();
+        let screen_dim = ScreenDimension::new(window_width, window_height);
         let mut world = World::new();
         world.add_resource::<InputHandler>(input_handler);
         world.add_resource::<RenderBuffer0>(tile_buffer);
         world.add_resource::<RenderBuffer1>(object_buffer);
+        world.add_resource::<ScreenDimension>(screen_dim);
         world.register::<Renderable>();
         world.register::<Text>();
         world.register::<Position>();
@@ -73,7 +75,7 @@ impl<'a, 'b> Game<'a, 'b> {
         let render_sys = RenderSystem;
         planner.add_system(render_sys, "render", 0);
         // state machine
-        let opening = states::OpeningState::new(4.0);
+        let opening = states::OpeningState::new(8.0);
         let state_machine = StateMachine::new(opening);
 
         let mut game = Game {
@@ -153,6 +155,7 @@ impl<'a, 'b> Game<'a, 'b> {
             }
         }
         self.planner.dispatch(());
+        // TODO: update screen dimisions
     }
 
     fn _render(&mut self, cmd: RenderCommand) {

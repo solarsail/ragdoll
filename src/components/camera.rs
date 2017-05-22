@@ -14,14 +14,15 @@ impl MainCamera {
     pub fn new(x: i32, y: i32, w: u32, h: u32) -> MainCamera {
         MainCamera {
             origin: Point { x, y },
-            size: Size(w, h),
+            size: Size { w, h },
         }
     }
 
-    pub fn translate(&mut self, v: V)
+    pub fn translate<V>(&mut self, v: V)
         where V: Into<Vector2<i32>>
     {
-        self.origin = (self.origin.into::<Point2<i32>>() + v.into()).into();
+        let p: Point2<i32> = self.origin.into();
+        self.origin = (p + v.into()).into();
     }
 
     pub fn origin(&self) -> Point {
