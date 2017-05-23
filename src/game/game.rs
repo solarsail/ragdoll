@@ -14,11 +14,11 @@ use sdl2::pixels::Color;
 use specs::{Planner, World, Gate};
 
 use game::states;
-use game::{InputHandler, StateMachine};
+use game::{InputHandler, StateMachine, DeltaTime};
 use game::render::{RenderBuffer0, RenderBuffer1, RenderCommand, ScreenDimension};
 use resource::AssetManager;
 use components::{Renderable, Position, Text, InputReceiver, MainCamera};
-use systems::RenderSystem;
+use systems::{RenderSystem, MovementSystem};
 
 
 const FPS: u32 = 60;
@@ -60,11 +60,13 @@ impl<'a, 'b> Game<'a, 'b> {
         let tile_buffer = RenderBuffer0::new();
         let object_buffer = RenderBuffer1::new();
         let screen_dim = ScreenDimension::new(window_width, window_height);
+        let delta_time = 0.0;
         let mut world = World::new();
         world.add_resource::<InputHandler>(input_handler);
         world.add_resource::<RenderBuffer0>(tile_buffer);
         world.add_resource::<RenderBuffer1>(object_buffer);
         world.add_resource::<ScreenDimension>(screen_dim);
+        world.add_resource::<DeltaTime>(delta_time);
         world.register::<Renderable>();
         world.register::<Text>();
         world.register::<Position>();
@@ -145,11 +147,17 @@ impl<'a, 'b> Game<'a, 'b> {
 
     fn update(&mut self) {
         loop {
+            let dt = self.time_per_frame.as_secs() as f32 +
+                     self.time_per_frame.subsec_nanos() as f32 / 1_000_000_000.0;
+            {
+                let mut dt_res = self.planner
+                    .mut_world()
+                    .write_resource::<DeltaTime>()
+                    .pass();
+                *&dt_res = dt;
+            }
             self.state_machine
-                .update(self.planner.mut_world(),
-                        &mut self.assets,
-                        self.time_per_frame.as_secs() as f32 +
-                        self.time_per_frame.subsec_nanos() as f32 / 1_000_000_000.0);
+                .update(self.planner.mut_world(), &mut self.assets, dt);
             if self.accumulated_delta > self.time_per_frame {
                 self.accumulated_delta -= self.time_per_frame;
             } else {
