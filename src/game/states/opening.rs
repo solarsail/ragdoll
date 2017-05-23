@@ -2,14 +2,15 @@ use specs::{World, Entity, Gate, Join};
 use sdl2::pixels::Color;
 
 use game::{InputHandler, State, Trans};
+use game::input::Keycode;
 use game::render::ScreenDimension;
+use game::states::GameplayState;
 use resource::AssetManager;
 use components::{Renderable, Position, Text};
 
 
 pub struct OpeningState {
-    logo: Option<Entity>,
-    text: Option<Entity>,
+    entities: Vec<Entity>,
     total: f32,
     remaining: f32,
 }
@@ -17,8 +18,7 @@ pub struct OpeningState {
 impl OpeningState {
     pub fn new(elapse: f32) -> OpeningState {
         OpeningState {
-            logo: None,
-            text: None,
+            entities: Vec::new(),
             total: elapse,
             remaining: elapse,
         }
@@ -46,35 +46,42 @@ impl State for OpeningState {
                              "this is a test 测试",
                              Color::RGBA(200, 200, 200, 200),
                              100);
-        self.logo = Some(world.create_now().with(logo).with(p).build());
-        self.text = Some(world
-                             .create_now()
-                             .with(text)
-                             .with(Position::new2(100, 100))
-                             .build());
+        self.entities
+            .push(world.create_now().with(logo).with(p).build());
+        self.entities
+            .push(world
+                      .create_now()
+                      .with(text)
+                      .with(Position::new2(100, 100))
+                      .build());
     }
 
     fn on_stop(&mut self, world: &mut World, _assets: &mut AssetManager) {
-        world.delete_now(self.logo.unwrap());
-        world.delete_now(self.text.unwrap());
+        for e in &self.entities {
+            world.delete_now(*e);
+        }
     }
 
     fn update(&mut self, world: &mut World, _assets: &mut AssetManager, dt: f32) -> Trans {
         self.remaining -= dt;
+        let mut done = false;
         if self.remaining < 0.0 {
-            return Trans::None; // TODO: trans
-        }
-        let mut input_handler = world.write_resource::<InputHandler>().pass();
-        let (entities, renderables) = (world.entities(), world.write::<Renderable>());
-        for (entity, mut r) in (&entities.pass(), &mut renderables.pass()).join() {
-            if entity == self.logo.unwrap() {
+            done = true;
+        } else {
+            let mut input_handler = world.write_resource::<InputHandler>().pass();
+            let (entities, renderables) = (world.entities(), world.write::<Renderable>());
+            for (entity, mut r) in (&entities.pass(), &mut renderables.pass()).join() {
                 r.alpha = self.logo_alpha();
             }
-        }
 
-        for click in input_handler.clicked_iter() {
-            debug!("mouse click: {:?}", click);
+            if input_handler.key_down(Keycode::Escape) {
+                done = true;
+            }
         }
-        Trans::None
+        if done {
+            Trans::Switch(Box::new(GameplayState::new()))
+        } else {
+            Trans::None
+        }
     }
 }

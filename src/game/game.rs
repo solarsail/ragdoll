@@ -17,7 +17,7 @@ use game::states;
 use game::{InputHandler, StateMachine};
 use game::render::{RenderBuffer0, RenderBuffer1, RenderCommand, ScreenDimension};
 use resource::AssetManager;
-use components::{Renderable, Position, Text};
+use components::{Renderable, Position, Text, InputReceiver, MainCamera};
 use systems::RenderSystem;
 
 
@@ -68,6 +68,8 @@ impl<'a, 'b> Game<'a, 'b> {
         world.register::<Renderable>();
         world.register::<Text>();
         world.register::<Position>();
+        world.register::<InputReceiver>();
+        world.register::<MainCamera>();
         // planner
         let pool = Arc::new(ThreadPool::new(num_cpus::get()));
         let mut planner = Planner::from_pool(world, pool);

@@ -35,20 +35,20 @@ impl InputHandler {
         match *e {
             Event::KeyDown { keycode: Some(c), .. } => {
                 self.keys_down.insert(c);
-                debug!("key down: {:?}", c);
+                //debug!("key down: {:?}", c);
             }
             Event::KeyUp { keycode: Some(c), .. } => {
                 self.keys_down.remove(&c);
-                debug!("key up: {:?}", c);
+                //debug!("key up: {:?}", c);
             }
             Event::MouseButtonDown { mouse_btn, x, y, .. } => {
                 self.cursor_pos = [x, y];
                 self.mouse_down.insert(mouse_btn);
-                debug!("mouse down: {:?}", mouse_btn);
+                //debug!("mouse down: {:?}", mouse_btn);
             }
             Event::MouseButtonUp { mouse_btn, x, y, .. } => {
                 self.cursor_pos = [x, y];
-                debug!("mouse up: {:?}", mouse_btn);
+                //debug!("mouse up: {:?}", mouse_btn);
                 if self.mouse_down.remove(&mouse_btn) {
                     self.mouse_clicked
                         .push_back(Click {
@@ -56,7 +56,7 @@ impl InputHandler {
                                        x,
                                        y,
                                    });
-                    debug!("mouse click: {:?}", mouse_btn);
+                    //debug!("mouse click: {:?}", mouse_btn);
                 }
             }
             Event::MouseMotion { x, y, .. } => {
