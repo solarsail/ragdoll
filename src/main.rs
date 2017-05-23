@@ -5,7 +5,7 @@ extern crate log4rs;
 extern crate sdl2;
 extern crate rectgrid;
 extern crate find_folder;
-extern crate nalgebra as na;
+extern crate cgmath;
 extern crate specs;
 extern crate num_cpus;
 extern crate threadpool;

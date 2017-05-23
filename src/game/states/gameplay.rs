@@ -6,6 +6,7 @@ use game::render::ScreenDimension;
 use game::input::Keycode;
 use resource::AssetManager;
 use components::{Renderable, Position, Text, MainCamera, InputReceiver};
+use cgmath::{Vector2, InnerSpace};
 
 
 pub struct GameplayState {
@@ -48,18 +49,23 @@ impl State for GameplayState {
     fn update(&mut self, world: &mut World, _assets: &mut AssetManager, dt: f32) -> Trans {
         let mut input_handler = world.write_resource::<InputHandler>().pass();
         let (ps, rs) = (world.write::<Position>(), world.read::<InputReceiver>());
-        // TODO: use unit vector and constant speed
+        let mut v = Vector2::new(0.0, 0.0);
+        if input_handler.key_down(Keycode::W) {
+            v.y -= 1.0;
+        } else if input_handler.key_down(Keycode::S) {
+            v.y += 1.0;
+        }
+        if input_handler.key_down(Keycode::A) {
+            v.x -= 1.0;
+        } else if input_handler.key_down(Keycode::D) {
+            v.x += 1.0;
+        }
+        if v.magnitude2() > 0.0 {
+            v = v.normalize_to(100.0 * dt); // use meters instead of pixels?
+        }
         for (mut p, r) in (&mut ps.pass(), &rs.pass()).join() {
-            if input_handler.key_down(Keycode::W) {
-                p.y -= (100.0 * dt) as i32;
-            } else if input_handler.key_down(Keycode::S) {
-                p.y += (100.0 * dt) as i32;
-            }
-            if input_handler.key_down(Keycode::A) {
-                p.x -= (100.0 * dt) as i32;
-            } else if input_handler.key_down(Keycode::D) {
-                p.x += (100.0 * dt) as i32;
-            }
+            p.x += v.x as i32;
+            p.y += v.y as i32;
         }
         for click in input_handler.clicked_iter() {
             debug!("mouse click: {:?}", click);
