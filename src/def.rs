@@ -1,8 +1,8 @@
 use cgmath::{Point2, Vector2};
 
 
-pub type Point = Point2<i32>;
-pub type Vector = Vector2<i32>;
+pub type Point = Point2<f32>;
+pub type Vector = Vector2<f32>;
 
 
 #[derive(Debug, Clone, Copy)]

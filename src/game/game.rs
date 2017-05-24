@@ -14,7 +14,7 @@ use sdl2::pixels::Color;
 use specs::{Planner, World, Gate};
 
 use game::states;
-use game::{InputHandler, StateMachine, DeltaTime};
+use game::{InputHandler, StateMachine, GameClock};
 use game::render::{RenderBuffer0, RenderBuffer1, RenderCommand, ScreenDimension};
 use resource::AssetManager;
 use components::{Renderable, Position, Text, InputReceiver, MainCamera};
@@ -60,13 +60,13 @@ impl<'a, 'b> Game<'a, 'b> {
         let tile_buffer = RenderBuffer0::new();
         let object_buffer = RenderBuffer1::new();
         let screen_dim = ScreenDimension::new(window_width, window_height);
-        let delta_time = 0.0;
+        let game_clock = GameClock::new();
         let mut world = World::new();
         world.add_resource::<InputHandler>(input_handler);
         world.add_resource::<RenderBuffer0>(tile_buffer);
         world.add_resource::<RenderBuffer1>(object_buffer);
         world.add_resource::<ScreenDimension>(screen_dim);
-        world.add_resource::<DeltaTime>(delta_time);
+        world.add_resource::<GameClock>(game_clock);
         world.register::<Renderable>();
         world.register::<Text>();
         world.register::<Position>();
@@ -77,7 +77,9 @@ impl<'a, 'b> Game<'a, 'b> {
         let mut planner = Planner::from_pool(world, pool);
         // systems
         let render_sys = RenderSystem;
-        planner.add_system(render_sys, "render", 0);
+        let movement_sys = MovementSystem;
+        planner.add_system(render_sys, "render", 1);
+        planner.add_system(movement_sys, "movement", 0);
         // state machine
         let opening = states::OpeningState::new(8.0);
         let state_machine = StateMachine::new(opening);
@@ -150,11 +152,11 @@ impl<'a, 'b> Game<'a, 'b> {
             let dt = self.time_per_frame.as_secs() as f32 +
                      self.time_per_frame.subsec_nanos() as f32 / 1_000_000_000.0;
             {
-                let mut dt_res = self.planner
+                let mut clock = self.planner
                     .mut_world()
-                    .write_resource::<DeltaTime>()
+                    .write_resource::<GameClock>()
                     .pass();
-                *&dt_res = dt;
+                clock.dt = dt;
             }
             self.state_machine
                 .update(self.planner.mut_world(), &mut self.assets, dt);
@@ -178,10 +180,10 @@ impl<'a, 'b> Game<'a, 'b> {
             } => {
                 let texture = self.assets.texture(&texture_id);
                 let rect = if let Some(s) = size {
-                    Rect::new(pos.x, pos.y, s.w, s.h)
+                    Rect::new(pos.x as i32, pos.y as i32, s.w, s.h)
                 } else {
                     let q = texture.borrow().query();
-                    Rect::new(pos.x, pos.y, q.width, q.height)
+                    Rect::new(pos.x as i32, pos.y as i32, q.width, q.height)
                 };
                 if let Some(a) = alpha {
                     texture.borrow_mut().set_alpha_mod(a);
@@ -197,7 +199,7 @@ impl<'a, 'b> Game<'a, 'b> {
             } => {
                 let texture = self.assets.text(&font_id, &content, width, color);
                 let q = texture.borrow().query();
-                let rect = Rect::new(pos.x, pos.y, q.width, q.height);
+                let rect = Rect::new(pos.x as i32, pos.y as i32, q.width, q.height);
                 self.canvas.copy(&texture.borrow(), None, rect).unwrap();
             }
         }

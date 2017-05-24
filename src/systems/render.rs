@@ -17,10 +17,10 @@ impl System<()> for RenderSystem {
                            w.read::<Position>(),
                            w.read::<MainCamera>())
                       });
-        let mut camera_origin = Point::new(0, 0);
+        let mut camera_origin = Point::new(0.0, 0.0);
         for (c, p) in (&cameras, &positions).join() {
             // TODO: in case at map edges
-            camera_origin = Point::new(p.x - c.size.w as i32 / 2, p.y - c.size.h as i32 / 2);
+            camera_origin = Point::new(p.x - c.size.w as f32 / 2.0, p.y - c.size.h as f32 / 2.0);
         }
         for (r, p) in (&renderables, &positions).join() {
             object_buffer.push_back(RenderCommand::Texture {

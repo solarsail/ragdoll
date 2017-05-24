@@ -6,7 +6,6 @@ use game::render::ScreenDimension;
 use game::input::Keycode;
 use resource::AssetManager;
 use components::{Renderable, Position, Text, MainCamera, InputReceiver};
-use cgmath::{Vector2, InnerSpace};
 
 
 pub struct GameplayState {
@@ -28,13 +27,13 @@ impl State for GameplayState {
             .push(world
                       .create_now()
                       .with(rect)
-                      .with(Position::new2(0, 0))
+                      .with(Position::new2(0.0, 0.0))
                       .build());
         self.entities
             .push(world
                       .create_now()
                       .with(player)
-                      .with(Position::new2(100, 100))
+                      .with(Position::new2(100.0, 100.0))
                       .with(MainCamera::new(screen_dim.w, screen_dim.h))
                       .with(InputReceiver)
                       .build());

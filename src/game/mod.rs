@@ -8,4 +8,12 @@ pub use self::input::InputHandler;
 pub use self::game::Game;
 pub use self::state::{StateMachine, State, Trans};
 
-pub type DeltaTime = f32;
+pub struct GameClock {
+    pub dt: f32,
+}
+
+impl GameClock {
+    pub fn new() -> GameClock {
+        GameClock { dt: 0.0 }
+    }
+}

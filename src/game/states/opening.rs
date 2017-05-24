@@ -39,8 +39,8 @@ impl OpeningState {
 impl State for OpeningState {
     fn on_start(&mut self, world: &mut World, _assets: &mut AssetManager) {
         let screen_dim = world.read_resource::<ScreenDimension>().pass();
-        let p = Position::new2((screen_dim.w - 200) as i32 / 2,
-                               (screen_dim.h - 200) as i32 / 2);
+        let p = Position::new2((screen_dim.w as f32 - 200.0) / 2.0,
+                               (screen_dim.h as f32 - 200.0) / 2.0);
         let logo = Renderable::new("logo", 200, 200);
         let text = Text::new("content",
                              "this is a test 测试",
@@ -52,7 +52,7 @@ impl State for OpeningState {
             .push(world
                       .create_now()
                       .with(text)
-                      .with(Position::new2(100, 100))
+                      .with(Position::new2(100.0, 100.0))
                       .build());
     }
 
