@@ -1,4 +1,4 @@
-use specs::{World, Entity, Gate, Join};
+use specs::{Planner, Entity, Gate, Join};
 use sdl2::pixels::Color;
 
 use game::{InputHandler, State, Trans};
@@ -37,7 +37,8 @@ impl OpeningState {
 }
 
 impl State for OpeningState {
-    fn on_start(&mut self, world: &mut World, _assets: &mut AssetManager) {
+    fn on_start(&mut self, planner: &mut Planner<()>, _assets: &mut AssetManager) {
+        let mut world = planner.mut_world();
         let screen_dim = world.read_resource::<ScreenDimension>().pass();
         let p = Position::new2((screen_dim.w as f32 - 200.0) / 2.0,
                                (screen_dim.h as f32 - 200.0) / 2.0);
@@ -56,18 +57,19 @@ impl State for OpeningState {
                       .build());
     }
 
-    fn on_stop(&mut self, world: &mut World, _assets: &mut AssetManager) {
+    fn on_stop(&mut self, planner: &mut Planner<()>, _assets: &mut AssetManager) {
         for e in &self.entities {
-            world.delete_now(*e);
+            planner.mut_world().delete_now(*e);
         }
     }
 
-    fn update(&mut self, world: &mut World, _assets: &mut AssetManager, dt: f32) -> Trans {
+    fn update(&mut self, planner: &mut Planner<()>, _assets: &mut AssetManager, dt: f32) -> Trans {
         self.remaining -= dt;
         let mut done = false;
         if self.remaining < 0.0 {
             done = true;
         } else {
+            let mut world = planner.mut_world();
             let mut input_handler = world.write_resource::<InputHandler>().pass();
             let (entities, renderables) = (world.entities(), world.write::<Renderable>());
             for (entity, mut r) in (&entities.pass(), &mut renderables.pass()).join() {

@@ -1,4 +1,4 @@
-use specs::{World, Entity, Gate, Join};
+use specs::{Planner, World, Entity, Gate, Join};
 use sdl2::pixels::Color;
 
 use game::{InputHandler, State, Trans};
@@ -6,6 +6,7 @@ use game::render::ScreenDimension;
 use game::input::Keycode;
 use resource::AssetManager;
 use components::{Renderable, Position, Text, MainCamera, InputReceiver};
+use systems::MovementSystem;
 
 
 pub struct GameplayState {
@@ -19,7 +20,9 @@ impl GameplayState {
 }
 
 impl State for GameplayState {
-    fn on_start(&mut self, world: &mut World, _assets: &mut AssetManager) {
+    fn on_start(&mut self, planner: &mut Planner<()>, _assets: &mut AssetManager) {
+        planner.add_system(MovementSystem, "movement", 0);
+        let mut world = planner.mut_world();
         let screen_dim = world.read_resource::<ScreenDimension>().pass();
         let rect = Renderable::new("rect", 100, 100);
         let player = Renderable::new("player", 32, 32);
@@ -39,18 +42,22 @@ impl State for GameplayState {
                       .build());
     }
 
-    fn on_stop(&mut self, world: &mut World, _assets: &mut AssetManager) {
+    fn on_stop(&mut self, planner: &mut Planner<()>, _assets: &mut AssetManager) {
+        let mut ind: usize = 0;
+        for (i, v) in planner.systems.iter().enumerate() {
+            if v.name == "movement" {
+                ind = i;
+                break;
+            }
+        }
+        planner.systems.remove(ind);
+        let mut world = planner.mut_world();
         for e in &self.entities {
             world.delete_now(*e);
         }
     }
 
-    fn update(&mut self, world: &mut World, _assets: &mut AssetManager, dt: f32) -> Trans {
-        let mut input_handler = world.write_resource::<InputHandler>().pass();
-
-        for click in input_handler.clicked_iter() {
-            debug!("mouse click: {:?}", click);
-        }
+    fn update(&mut self, _planner: &mut Planner<()>, _assets: &mut AssetManager, dt: f32) -> Trans {
         Trans::None
     }
 }

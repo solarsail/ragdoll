@@ -32,8 +32,9 @@ impl System<()> for MovementSystem {
         if v.magnitude2() > 0.0 {
             v = v.normalize_to(100.0 * clock.dt); // use meters instead of pixels?
         }
+        //println!("{:?}", v);
 
-        for (mut p, r) in (&mut ps, &rs).join() {
+        for (mut p, _) in (&mut ps, &rs).join() {
             p.x += v.x;
             p.y += v.y;
         }

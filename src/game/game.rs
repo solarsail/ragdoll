@@ -21,7 +21,7 @@ use components::{Renderable, Position, Text, InputReceiver, MainCamera};
 use systems::{RenderSystem, MovementSystem};
 
 
-const FPS: u32 = 60;
+const FPS: u32 = 100;
 
 pub struct Game<'a, 'b> {
     canvas: &'a mut WindowCanvas,
@@ -77,9 +77,7 @@ impl<'a, 'b> Game<'a, 'b> {
         let mut planner = Planner::from_pool(world, pool);
         // systems
         let render_sys = RenderSystem;
-        let movement_sys = MovementSystem;
         planner.add_system(render_sys, "render", 1);
-        planner.add_system(movement_sys, "movement", 0);
         // state machine
         let opening = states::OpeningState::new(8.0);
         let state_machine = StateMachine::new(opening);
@@ -103,7 +101,7 @@ impl<'a, 'b> Game<'a, 'b> {
 
     fn run(&mut self) {
         self.state_machine
-            .start(self.planner.mut_world(), &mut self.assets);
+            .start(&mut self.planner, &mut self.assets);
 
         while self.running {
             self.frame_counter += 1;
@@ -118,10 +116,12 @@ impl<'a, 'b> Game<'a, 'b> {
             // render
             self.render();
 
+
             let frame_time = frame_start.elapsed();
             if frame_time < self.time_per_frame {
                 thread::sleep(self.time_per_frame - frame_time);
             }
+
         }
     }
 
@@ -140,7 +140,7 @@ impl<'a, 'b> Game<'a, 'b> {
                     }
                     _ => {
                         self.state_machine
-                            .handle_event(&event, self.planner.mut_world(), &mut self.assets)
+                            .handle_event(&event, &mut self.planner, &mut self.assets)
                     }
                 }
             }
@@ -159,7 +159,7 @@ impl<'a, 'b> Game<'a, 'b> {
                 clock.dt = dt;
             }
             self.state_machine
-                .update(self.planner.mut_world(), &mut self.assets, dt);
+                .update(&mut self.planner, &mut self.assets, dt);
             if self.accumulated_delta > self.time_per_frame {
                 self.accumulated_delta -= self.time_per_frame;
             } else {
