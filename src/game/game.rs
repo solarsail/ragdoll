@@ -150,7 +150,7 @@ impl<'a, 'b> Game<'a, 'b> {
     fn update(&mut self) {
         loop {
             let dt = self.time_per_frame.as_secs() as f32 +
-                     self.time_per_frame.subsec_nanos() as f32 / 1_000_000_000.0;
+                     self.time_per_frame.subsec_nanos() as f32 / 1.0e9;
             {
                 let mut clock = self.planner
                     .mut_world()
